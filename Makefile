@@ -12,11 +12,11 @@ OBJECTS = \
 	gpio.o \
 	i2c.o \
 	ssd1311.o \
-	main.o \
-	scr.o \
 	dt.o \
 	net.o \
-	si.o
+	si.o \
+	scr.o \
+	main.o
 
 TARGET = morda
 
@@ -51,6 +51,6 @@ clean:
 	rm -rfv *.o
 
 distclean:
-	rm -rfv *.o ssd1311
+	rm -rfv *.o $(TARGET)
 
 
