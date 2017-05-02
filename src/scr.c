@@ -68,35 +68,47 @@ int scr_deinit(void)
 	}
 }
 
-int show_ip_addr(void)
+
+#if 0
+typedef int (*_fn_t)(void);
+
+struct _fn_list_t {
+	_fn_t fn;
+	struct _fn_list_t *next;
+};
+
+int init_fn(struct _fn_list_t **list, _fn_t *fnlst)
 {
-	int fd;
-	struct ifreq ifr;
-	char str[16];
-	int l;
-	char iface[] = "wlan0";
+	struct _fn_list_t *top;
 
-	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (list == 0) {
+		return -1;
+	}
 
-	//Type of address to retrieve - IPv4 IP address
-	ifr.ifr_addr.sa_family = AF_INET;
+	*list = malloc(sizeof(struct _fn_list_t));
 
-	//Copy the interface name in the ifreq structure
-	strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
+	if (*list == 0) {
+		return -1;
+	}
 
-	ioctl(fd, SIOCGIFADDR, &ifr);
+	(*list)->fn = *fnlst;
+	fnlst++;
+	top = *list;
 
-	close(fd);
 
-	//display result
-	sprintf(str, "%s\0" ,
-		inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+	while (*fnlst != 0) {
+		(*list)->next = malloc(sizeof(struct _fn_list_t));
+		*list = (*list)->next;
+		(*list)->fn = *fnlst;
+		fnlst++;
+	}
 
-	l = strlen(str);
-	memset(&str[l], ' ', 16 - l);
-	strcpy(&ssd1311_str[16], str);
+	(*list)->next = top;
+	*list = top;
+
 	return 0;
 }
+#endif
 
 
 struct _show_func {
@@ -105,7 +117,6 @@ struct _show_func {
 };
 
 struct _show_func *sfptr;
-
 
 void init_show(void)
 {
@@ -134,15 +145,7 @@ void init_show(void)
 	sfptr = sfptr->next;
 	sfptr->show_func = show_cpu_temp;
 
-#	if 0
-	sfptr->next = malloc(sizeof(struct _show_func));
-	if (sfptr->next == 0) {
-		printf("[%s:%d]Failed to allocate \'struct _show_func\'\n");
-		return;
-	}
-	sfptr = sfptr->next;
-	sfptr->show_func = show_ip_addr;
-#	endif
+
 	sfptr->next = top;
 	sfptr = top;
 }
@@ -184,3 +187,42 @@ int animation(void)
 
 	return 0;
 }
+
+
+//int show_ip_addr(void)
+//{
+//	int fd;
+//	struct ifreq ifr;
+//	char str[16];
+//	int l;
+//	char iface[] = "wlan0";
+
+//	fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+//	//Type of address to retrieve - IPv4 IP address
+//	ifr.ifr_addr.sa_family = AF_INET;
+
+//	//Copy the interface name in the ifreq structure
+//	strncpy(ifr.ifr_name , iface , IFNAMSIZ-1);
+
+//	ioctl(fd, SIOCGIFADDR, &ifr);
+
+//	close(fd);
+
+//	//display result
+//	sprintf(str, "%s\0" ,
+//		inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+
+//	l = strlen(str);
+//	memset(&str[l], ' ', 16 - l);
+//	strcpy(&ssd1311_str[16], str);
+//	return 0;
+//}
+
+//	sfptr->next = malloc(sizeof(struct _show_func));
+//	if (sfptr->next == 0) {
+//		printf("[%s:%d]Failed to allocate \'struct _show_func\'\n");
+//		return;
+//	}
+//	sfptr = sfptr->next;
+//	sfptr->show_func = show_ip_addr;
