@@ -1,6 +1,12 @@
 
 CC = gcc
+
 CFLAGS =
+
+INCLUDEPATH += \
+	-I src/hw/
+
+DEFINES =
 
 OBJECTS = \
 	gpio.o \
@@ -17,14 +23,14 @@ TARGET = morda
 $(TARGET) : $(OBJECTS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS)
 
-gpio.o : src/gpio.c
-	$(CC) $(CFLAGS) -c src/gpio.c
+gpio.o : src/hw/gpio.c
+	$(CC) $(CFLAGS) -c src/hw/gpio.c
 
-i2c.o : src/i2c.c
-	$(CC) $(CFLAGS) -c src/i2c.c
+i2c.o : src/hw/i2c.c
+	$(CC) $(CFLAGS) -c src/hw/i2c.c
 
-ssd1311.o : src/ssd1311.c src/ssd1311.h
-	$(CC) $(CFLAGS) -c src/ssd1311.c
+ssd1311.o : src/hw/ssd1311.c src/hw/ssd1311.h
+	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/hw/ssd1311.c
 
 dt.o : src/dt.c
 	$(CC) $(CFLAGS) -c src/dt.c
@@ -35,8 +41,8 @@ net.o : src/net.c
 si.o : src/si.c
 	$(CC) $(CFLAGS) -c src/si.c
 
-scr.o : src/scr.c src/ssd1311.h
-	$(CC) $(CFLAGS) -c src/scr.c
+scr.o : src/scr.c src/hw/ssd1311.h
+	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/scr.c
 
 main.o: src/main.c
 	$(CC) $(CFLAGS) -c src/main.c

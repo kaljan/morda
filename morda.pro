@@ -1,18 +1,25 @@
 
-SOURCES += \
-    src/gpio.c \
-    src/i2c.c \
-    src/main.c \
-    src/ssd1311.c \
-    src/scr.c \
-    src/dt.c \
-    src/net.c \
-    src/si.c
+CONFIG -= qt
 
-DISTFILES += \
-    Makefile \
-    .gitignore
+INCLUDEPATH += \
+	src \
+	src/hw \
+
+SOURCES += \
+	src/hw/gpio.c \
+	src/hw/i2c.c \
+	src/hw/ssd1311.c \
+	src/main.c \
+	src/scr.c \
+	src/dt.c \
+	src/net.c \
+	src/si.c
 
 HEADERS += \
-    src/ssd1311.h
+	src/hw/ssd1311.h
+
+DISTFILES += \
+	Makefile \
+	.gitignore
+
 
