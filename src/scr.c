@@ -2,19 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-//#include <fcntl.h>
-//#include <errno.h>
-//#include <time.h>
-
-//#include <sys/stat.h>
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <sys/ioctl.h>
-//#include <sys/sysinfo.h>
-
-//#include <netinet/in.h>
-//#include <net/if.h>
-//#include <arpa/inet.h>
 
 #include "ssd1311.h"
 
