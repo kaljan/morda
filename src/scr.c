@@ -7,14 +7,6 @@
 
 #include "si.h"
 
-extern int get_time(char *str);
-extern int show_date(void);
-extern int show_week_day(void);
-
-extern int get_ip_addr(const char *iface, char *ipstr);
-
-extern int show_cpu_temp(void);
-
 
 extern int end_app;
 
