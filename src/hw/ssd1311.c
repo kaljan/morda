@@ -5,10 +5,16 @@
 
 #include "ssd1311.h"
 
+
+extern int gpio_reset_ssd1311(void);
+extern int gpio_reset_off(void);
+
 extern int i2c_send_data(uint8_t addr, const uint8_t *buf, int size);
+
 
 #define SSD1311_I2C_ADDR		0x3C
 #define SSD1311_INIT_SEQ_SIZE	24
+
 
 static const uint8_t ssd1311_init_seq[SSD1311_INIT_SEQ_SIZE] = {
 	// Set Sleep Mode On
@@ -42,27 +48,23 @@ static const uint8_t ssd1311_init_seq[SSD1311_INIT_SEQ_SIZE] = {
 	0x00, SSD1311_DDRAM_ADDR,
 };
 
-struct str_db {
-	uint8_t *str;
-	struct str_db *next;
-};
+static const uint8_t ssd1311_on_seq[2] = {0x00, 0x0C};
+static uint8_t ssd1311_packet[68];
+static char ssd1311_str[33];
 
-static struct str_db str_db1;
-static struct str_db str_db2;
-static struct str_db *db;
 
-static uint8_t str1[68];
-static uint8_t str2[68];
-
-char ssd1311_str[33];
+static int ssd1311_on(void)
+{
+	return i2c_send_data(SSD1311_I2C_ADDR, ssd1311_on_seq, 2);
+}
 
 int ssd1311_init(void)
 {
-	str_db1.str = str1;
-	str_db2.str = str2;
-	str_db1.next = &str_db2;
-	str_db2.next = &str_db1;
-	db = &str_db2;
+
+	if (gpio_reset_ssd1311() != 0) {
+		printf("[%s:%d] Reset SSD1311 failed\n", __func__, __LINE__);
+		return -1;
+	}
 
 	memset(ssd1311_str, ' ', 32);
 
@@ -71,14 +73,20 @@ int ssd1311_init(void)
 		return -1;
 	}
 
+	if (ssd1311_on() != 0) {
+		printf("[%s:%d] Running SSD1311 failed\n", __func__, __LINE__);
+		return -1;
+	}
+
 	return 0;
 }
 
-static uint8_t ssd1311_on_seq[2] = {0x00, 0x0C};
-
-int ssd1311_on(void)
+int ssd1311_deinit(void)
 {
-	return i2c_send_data(SSD1311_I2C_ADDR, ssd1311_on_seq, 2);
+	if (gpio_reset_off() != 0) {
+		return -1;
+	}
+	return 0;
 }
 
 static void prepare_str(uint8_t *packet, const char *str)
@@ -127,7 +135,7 @@ int ssd1311_set_string(const char *str, int start)
 			break;
 		}
 	}
-	prepare_str(str1, ssd1311_str);
-	return i2c_send_data(SSD1311_I2C_ADDR, str1, 68);
+	prepare_str(ssd1311_packet, ssd1311_str);
+	return i2c_send_data(SSD1311_I2C_ADDR, ssd1311_packet, 68);
 
 }

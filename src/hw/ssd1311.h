@@ -22,13 +22,13 @@
 #define SSD1311_EXFNSET_FW		0x04	//
 
 #define SSD1311_SHIFT			0x10	// Cursor or Display Shift
-#define SSD1311_SHIFT_RL		0x08	// 
-#define SSD1311_SHIFT_SC		0x04	// 
+#define SSD1311_SHIFT_RL		0x08	//
+#define SSD1311_SHIFT_SC		0x04	//
 
 #define SSD1311_DDS				0x10	// Double Height (4-line)/Display-dot shift
-#define SSD1311_DDS_DH			0x01	// 
-#define SSD1311_DDS_UD1			0x04	// 
-#define SSD1311_DDS_UD2			0x08	// 
+#define SSD1311_DDS_DH			0x01	//
+#define SSD1311_DDS_UD1			0x04	//
+#define SSD1311_DDS_UD2			0x08	//
 
 #define SSD1311_SHIFT_EN		0x10	// Shift Enable
 #define SSD1311_SHIFT_EN_DS1	0x01	//
@@ -61,7 +61,7 @@
 #define SSD1311_EX_FSELA_5V_EN	0x5C
 #define SSD1311_EX_FSELB		0x72	// Function Selection B
 #define SSD1311_EX_CHZ			0x78	// OLED Characterization
-#define SSD1311_EX_CHZ_SD		0x01	// 
+#define SSD1311_EX_CHZ_SD		0x01	//
 #define SSD1311_EX_SETCC		0x81	// Set Contrast Control
 #define SSD1311_EX_CLKCTRL		0xD5	// Set Display Clock Divide Ratio/Oscillator Frequency
 #define SSD1311_EX_SET_PL		0xD9	// Set Phase Length
@@ -71,7 +71,7 @@
 #define SSD1311_EX_SET_FADE		0x23	// Set Fade Out and Fade in / out
 
 int ssd1311_init(void);
-int ssd1311_on(void);
+int ssd1311_deinit(void);
 int ssd1311_set_string(const char *str, int start);
 
 #endif // SSD1311_H

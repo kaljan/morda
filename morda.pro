@@ -11,12 +11,11 @@ SOURCES += \
 	src/hw/ssd1311.c \
 	src/main.c \
 	src/scr.c \
-	src/dt.c \
-	src/net.c \
 	src/si.c
 
 HEADERS += \
-	src/hw/ssd1311.h
+	src/hw/ssd1311.h \
+    src/si.h
 
 DISTFILES += \
 	Makefile \

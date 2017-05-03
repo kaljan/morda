@@ -5,9 +5,7 @@
 
 #include "ssd1311.h"
 
-
-extern int gpio_reset_ssd1311(void);
-extern int gpio_reset_off(void);
+#include "si.h"
 
 extern int get_time(char *str);
 extern int show_date(void);
@@ -29,7 +27,7 @@ struct _fn_list_t {
 };
 
 
-char ssd1311_str[33];
+char lcd_str[33];
 
 _fn_t sh_fns[] = {
 	show_date,
@@ -40,36 +38,6 @@ _fn_t sh_fns[] = {
 
 struct _fn_list_t *sh_fn_list;
 
-
-int scr_init(void)
-{
-	if (gpio_reset_ssd1311() != 0) {
-		printf("[%s:%d] Reset SSD1311 failed\n", __func__, __LINE__);
-		return -1;
-	}
-
-	if (ssd1311_init() != 0) {
-		printf("[%s:%d] Init SSD1311 failed\n", __func__, __LINE__);
-		return -1;
-	}
-
-	if (ssd1311_on() != 0) {
-		printf("[%s:%d] Running SSD1311 failed\n", __func__, __LINE__);
-		return -1;
-	}
-
-	if (ssd1311_set_string("Hello World!\0", 0) != 0) {
-		printf("[%s:%d] Write text on SSD1311 failed\n", __func__, __LINE__);
-		return -1;
-	}
-}
-
-int scr_deinit(void)
-{
-	if (gpio_reset_off() != 0) {
-		return -1;
-	}
-}
 
 int init_fn(struct _fn_list_t **list, _fn_t *fnlst)
 {
@@ -107,9 +75,15 @@ int animation(void)
 {
 	int i;
 
-	i = sprintf(ssd1311_str, "PID: %d", getpid());
-	memset(&ssd1311_str[i], ' ', 32 - i);
-	ssd1311_set_string(ssd1311_str, 0);
+	if (ssd1311_init() != 0) {
+		printf("[%s:%d] SSD1311 init failed\n", __func__, __LINE__);
+		ssd1311_deinit();
+		return -1;
+	}
+
+	i = sprintf(lcd_str, "PID: %d", getpid());
+	memset(&lcd_str[i], ' ', 32 - i);
+	ssd1311_set_string(lcd_str, 0);
 	usleep(500000);
 
 	i = 0;
@@ -122,12 +96,11 @@ int animation(void)
 			break;
 		}
 
-		get_time(ssd1311_str);
+		get_time(lcd_str);
 
 		(sh_fn_list->fn)();
 
-		ssd1311_set_string(ssd1311_str, 0);
-
+		ssd1311_set_string(lcd_str, 0);
 
 		i++;
 		if (i > 60) {
@@ -136,9 +109,13 @@ int animation(void)
 		}
 	}
 
-	sprintf(ssd1311_str, "EXIT");
-	memset(&ssd1311_str[4], ' ', 28);
-	ssd1311_set_string(ssd1311_str, 0);
+	sprintf(lcd_str, "EXIT");
+	memset(&lcd_str[4], ' ', 28);
+	ssd1311_set_string(lcd_str, 0);
+
+	if (ssd1311_deinit() != 0) {
+		return -1;
+	}
 
 	return 0;
 }

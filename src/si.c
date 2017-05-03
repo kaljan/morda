@@ -16,8 +16,14 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
+#include "si.h"
 
-extern char ssd1311_str[33];
+
+extern char lcd_str[33];
+
+
+time_t t;
+struct tm *tmptr;
 
 
 int get_cpu_temp(void)
@@ -56,8 +62,70 @@ int show_cpu_temp(void)
 
 	if (cpu_temperature > 0) {
 		cpu_temperature /= 100;
-		sprintf(&ssd1311_str[16], "CPU: %2d.%1d \'C    "
+		sprintf(&lcd_str[16], "CPU: %2d.%1d \'C    "
 			, cpu_temperature / 10, cpu_temperature % 10);
 	}
+	return 0;
+}
+
+int get_time(char *str)
+{
+	if (str == 0) {
+		return -1;
+	}
+	t = time(NULL);
+	tmptr = localtime(&t);
+	strftime(str, 9, "%T ", tmptr);
+	memset(&str[8], ' ', 24);
+	return 0;
+}
+
+int show_date(void)
+{
+	char str[16];
+	int l;
+
+	strftime(str, 13, "%d-%b-%Y ", tmptr);
+	l = strlen(str);
+	memset(&str[l], ' ', 16 - l);
+	strcpy(&lcd_str[16], str);
+	return 0;
+}
+
+int show_week_day(void)
+{
+	char str[16];
+	int l;
+
+	strftime(str, 16, "%A ", tmptr);
+	l = strlen(str);
+	memset(&str[l], ' ', 16 - l);
+	strcpy(&lcd_str[16], str);
+	return 0;
+}
+
+int get_ip_addr(const char *iface, char *ipstr)
+{
+	int fd, rv;
+	struct ifreq ifr;
+
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+		printf("Failed to open socket: %s\n", strerror(errno));
+		return -1;
+	}
+
+	ifr.ifr_addr.sa_family = AF_INET;
+
+	strncpy(ifr.ifr_name , iface , IFNAMSIZ - 1);
+
+	if ((rv = ioctl(fd, SIOCGIFADDR, &ifr)) == -1) {
+		printf("IOCTL error: %s\n", strerror(errno));
+		return -1;
+	}
+
+	close(fd);
+
+	sprintf(ipstr, "%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+
 	return 0;
 }
