@@ -8,6 +8,8 @@
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
+#include "periph.h"
+
 const char i2c_fname[]="/dev/i2c-1";
 int i2c_fd;
 

@@ -3,19 +3,21 @@ CONFIG -= qt
 
 INCLUDEPATH += \
 	src \
-	src/hw \
+	src/periph \
+	src/ssd1311
 
 SOURCES += \
-	src/hw/gpio.c \
-	src/hw/i2c.c \
-	src/hw/ssd1311.c \
 	src/main.c \
 	src/scr.c \
-	src/si.c
+	src/si.c \
+    src/ssd1311/ssd1311.c \
+    src/periph/gpio.c \
+    src/periph/i2c.c
 
 HEADERS += \
-	src/hw/ssd1311.h \
-    src/si.h
+    src/si.h \
+    src/ssd1311/ssd1311.h \
+    src/periph/periph.h
 
 DISTFILES += \
 	Makefile \
