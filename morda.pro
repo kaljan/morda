@@ -12,7 +12,8 @@ SOURCES += \
 	src/si.c \
     src/ssd1311/ssd1311.c \
     src/periph/gpio.c \
-    src/periph/i2c.c
+    src/periph/i2c.c \
+    src/btn.c
 
 HEADERS += \
     src/si.h \

@@ -8,6 +8,10 @@
 #include "si.h"
 
 
+extern int btn_test(void);
+extern int btn_init(void);
+extern int btn_deinit(void);
+
 extern int end_app;
 
 
@@ -67,6 +71,8 @@ int animation(void)
 {
 	int i;
 
+	btn_init();
+
 	if (ssd1311_init() != 0) {
 		printf("[%s:%d] SSD1311 init failed\n", __func__, __LINE__);
 		ssd1311_deinit();
@@ -83,6 +89,7 @@ int animation(void)
 	init_fn(&sh_fn_list, sh_fns);
 
 	while (1) {
+		btn_test();
 		usleep(500000);
 		if (end_app == 1) {
 			break;
@@ -108,6 +115,8 @@ int animation(void)
 	if (ssd1311_deinit() != 0) {
 		return -1;
 	}
+
+	btn_deinit();
 
 	return 0;
 }

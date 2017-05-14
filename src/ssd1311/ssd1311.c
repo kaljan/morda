@@ -52,32 +52,27 @@ static char ssd1311_str[33];
 
 static int gpio_reset_ssd1311(void)
 {
-	if (gpio_write("/sys/class/gpio/export", "18") != 0) {
-		printf("[%s:%d] Failed to export GPIO\n", __func__, __LINE__);
+	if (gpio_export(18) != 0) {
 		return -1;
 	}
 
-	if (gpio_write("/sys/class/gpio/gpio18/direction", "out") != 0) {
-		printf("[%s:%d] Failed to set GPIO direction\n", __func__, __LINE__);
+	if (gpio_set_direction(18, "out") != 0) {
 		return -1;
 	}
 
-	if (gpio_write("/sys/class/gpio/gpio18/value", "1") != 0) {
-		printf("[%s:%d] Failed to set GPIO value\n", __func__, __LINE__);
-		return -1;
-	}
-
-	usleep(50000);
-
-	if (gpio_write("/sys/class/gpio/gpio18/value", "0") != 0) {
-		printf("[%s:%d] Failed to set GPIO value\n", __func__, __LINE__);
+	if (gpio_set_value(18, 1) != 0) {
 		return -1;
 	}
 
 	usleep(50000);
 
-	if (gpio_write("/sys/class/gpio/gpio18/value", "1") != 0) {
-		printf("[%s:%d] Failed to set GPIO value\n", __func__, __LINE__);
+	if (gpio_set_value(18, 0) != 0) {
+		return -1;
+	}
+
+	usleep(50000);
+
+	if (gpio_set_value(18, 1) != 0) {
 		return -1;
 	}
 
@@ -109,11 +104,7 @@ int ssd1311_init(void)
 
 int ssd1311_deinit(void)
 {
-	if (gpio_write("/sys/class/gpio/unexport", "18") != 0) {
-		printf("[%s:%d] Failed to unexport GPIO\n", __func__, __LINE__);
-		return -1;
-	}
-	return 0;
+	return gpio_unexport(18);
 }
 
 static void prepare_str(uint8_t *packet, const char *str)
@@ -181,7 +172,7 @@ int ssd1311_set_text(const char *text, int start, int size)
 	return i2c_send_data(SSD1311_I2C_ADDR, ssd1311_packet, 68);
 }
 
-int ssd1311_append_text(const char text, int start, int size)
+int ssd1311_append_text(const char *text, int start, int size)
 {
 	strncpy(&ssd1311_str[start], text, size);
 
