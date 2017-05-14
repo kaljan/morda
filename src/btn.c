@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-//#include <pthread.h>
+#include <pthread.h>
 
 #include "periph.h"
 
@@ -23,6 +23,27 @@ static int btn_cfg_in(int pin)
 	}
 
 	return 0;
+}
+
+static int btn_pressed(int btn)
+{
+	int btn_value;
+
+	if ((btn_value = gpio_get_value(btn)) != 0) {
+		return -1;
+	}
+
+	if (btn_value == 1) {
+		return 0;
+	}
+
+	while (btn_value == 0) {
+		if ((btn_value = gpio_get_value(btn)) != 0) {
+			return -1;
+		}
+	}
+
+	return 1;
 }
 
 int btn_test(void)
@@ -47,6 +68,11 @@ int btn_test(void)
 	);
 
 	return 0;
+}
+
+void *btn_thread(void *arg)
+{
+	return arg;
 }
 
 int btn_init(void)
