@@ -1,7 +1,6 @@
 
 CC = gcc
 CFLAGS = -Wall
-RM = rm -rfv
 
 INCLUDEPATH += \
 	-I src \
@@ -14,7 +13,6 @@ OBJECTS = \
 	gpio.o \
 	i2c.o \
 	ssd1311.o \
-	btn.o \
 	si.o \
 	scr.o \
 	main.o
@@ -23,33 +21,30 @@ TARGET = morda
 
 
 $(TARGET) : $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -o $(TARGET) $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS)
 
 
 gpio.o : src/periph/gpio.c src/periph/periph.h
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/periph/gpio.c
+	$(CC) $(CFLAGS) -c src/periph/gpio.c
 
 i2c.o : src/periph/i2c.c src/periph/periph.h
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/periph/i2c.c
+	$(CC) $(CFLAGS) -c src/periph/i2c.c
 
 ssd1311.o : src/ssd1311/ssd1311.c src/ssd1311/ssd1311.h src/periph/periph.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/ssd1311/ssd1311.c
 
-btn.o : src/btn.c src/periph/periph.h
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/btn.c
-
 si.o : src/si.c src/si.h
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/si.c
+	$(CC) $(CFLAGS) -c src/si.c
 
 scr.o : src/scr.c src/ssd1311/ssd1311.h src/si.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/scr.c
 
 main.o: src/main.c
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/main.c
+	$(CC) $(CFLAGS) -c src/main.c
 
 
 clean:
-	$(RM) *.o
+	rm -rfv *.o
 
 distclean:
-	$(RM) *.o $(TARGET)
+	rm -rfv *.o $(TARGET)

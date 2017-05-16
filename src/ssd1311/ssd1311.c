@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-//#include <stdint.h>
-
 #include "ssd1311.h"
 #include "periph.h"
 
@@ -14,34 +12,17 @@
 
 
 static const uint8_t ssd1311_init_seq[SSD1311_INIT_SEQ_SIZE] = {
-	// Set Sleep Mode On
 	0x80, SSD1311_CTRL,
-
-	// **** Set "RE"= 1
 	0x80, SSD1311_FNSET | SSD1311_FNSET_N | SSD1311_FNSET_RE,
-
-	// Set "SD"=1
 	0x80, SSD1311_EX_CHZ | SSD1311_EX_CHZ_SD,
-
-	// Set Display Clock Divide Ratio/Oscillator Frequency
 	0x80, SSD1311_EX_CLKCTRL,
 	0x80, 0x70,
-
-	// Set Contrast
 	0x80, SSD1311_EX_SETCC,
 	0x80, 0xFF,
-
-	// Exiting Set OLED Characterization
 	0x80, SSD1311_EX_CHZ,
-
-	// Set Entry Mode
 	0x80, SSD1311_EXFNSET,
-
-	// Set "IS"=0 , "RE" = 0
 	0x80, SSD1311_FNSET | SSD1311_FNSET_N,
 	0x80, SSD1311_CLEAR,
-
-	// Set DDRAM Address to 0x80 (line 1 start)
 	0x00, SSD1311_DDRAM_ADDR,
 };
 
@@ -50,7 +31,7 @@ static uint8_t ssd1311_packet[68];
 static char ssd1311_str[33];
 
 
-static int gpio_reset_ssd1311(void)
+static int ssd1311_reset(void)
 {
 	if (gpio_export(18) != 0) {
 		return -1;
@@ -81,7 +62,7 @@ static int gpio_reset_ssd1311(void)
 
 int ssd1311_init(void)
 {
-	if (gpio_reset_ssd1311() != 0) {
+	if (ssd1311_reset() != 0) {
 		printf("[%s:%d] Reset SSD1311 failed\n", __func__, __LINE__);
 		return -1;
 	}

@@ -24,6 +24,59 @@ extern char lcd_str[33];
 
 time_t t;
 struct tm *tmptr;
+struct sysinfo si;
+
+int si_update(void)
+{
+	 if (sysinfo(&si) < 0) {
+		 printf("Can\'t get sysinfo: %s\n", strerror(errno));
+		 return -1;
+	 }
+
+	return 0;
+}
+
+int get_uptime(char *str, uint32_t time)
+{
+	int mins, secs, hours;
+
+	if (str == 0) {
+		return -1;
+	}
+
+	do {
+		secs = time % 60;
+		time /= 60;
+		if (time == 0) {
+			break;
+		}
+
+		mins = time % 60;
+		time /= 60;
+		if (time == 0) {
+			break;
+		}
+
+		hours = time % 24;
+		time /= 24;
+		if (time == 0) {
+		}
+
+
+	} while(0);
+
+	sprintf(str, "%d d. %02d:%02d:%02d", time, hours, mins, secs);
+
+	return 0;
+}
+
+int show_uptime(void)
+{
+	si_update();
+	get_uptime(&lcd_str[16], si.uptime);
+	return 0;
+}
+
 
 
 int get_cpu_temp(void)

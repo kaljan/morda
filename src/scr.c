@@ -29,6 +29,7 @@ _fn_t sh_fns[] = {
 	show_date,
 	show_week_day,
 	show_cpu_temp,
+	show_uptime,
 	0
 };
 

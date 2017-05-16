@@ -1,6 +1,8 @@
 #ifndef SI_H
 #define SI_H
 
+int show_uptime(void);
+
 int show_cpu_temp(void);
 int get_time(char *str);
 int show_date(void);
