@@ -38,7 +38,7 @@ int si_update(void)
 
 int get_uptime(char *str, uint32_t time)
 {
-	int mins, secs, hours;
+	int mins = 0, secs = 0, hours = 0;
 
 	if (str == 0) {
 		return -1;
