@@ -61,8 +61,6 @@ int get_uptime(char *str, uint32_t time)
 		time /= 24;
 		if (time == 0) {
 		}
-
-
 	} while(0);
 
 	sprintf(str, "%d d. %02d:%02d:%02d", time, hours, mins, secs);

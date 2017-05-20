@@ -72,7 +72,7 @@ int animation(void)
 {
 	int i;
 
-//	btn_init();
+	btn_init();
 
 	if (ssd1311_init() != 0) {
 		printf("[%s:%d] SSD1311 init failed\n", __func__, __LINE__);
@@ -117,7 +117,7 @@ int animation(void)
 		return -1;
 	}
 
-//	btn_deinit();
+	btn_deinit();
 
 	return 0;
 }
