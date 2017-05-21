@@ -8,7 +8,6 @@
 #include "si.h"
 
 
-extern int btn_test(void);
 extern int btn_init(void);
 extern int btn_deinit(void);
 
