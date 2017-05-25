@@ -47,42 +47,38 @@ static int btn_cfg_in(int pin)
 
 static int btn_debounce(int pin)
 {
-	int debounce_c = 64;
-	volatile int ival, oval;
+	int debounce_c = 256;
+	volatile int val;
 
-	while (1) {
-		ival = gpio_get_value(pin);
-		if (ival == 0) {
+	 do {
+		if (gpio_get_value(pin) == 0) {
 			debounce_c++;
-			if (debounce_c > 128) {
-				oval = 0;
-				break;
+			if (debounce_c < 512) {
+				continue;
 			}
-			continue;
-		}
-		debounce_c--;
-		if (debounce_c < 1) {
-			oval = 1;
+			val = 0;
 			break;
 		}
-	}
-	return oval;
+		debounce_c--;
+		if (debounce_c > 0) {
+			continue;
+		}
+		val = 1;
+		break;
+	} while (1);
+	return val;
 }
 
 static int btn_handler(btn_t *btn)
 {
 	if (btn->value == 1) {
 		btn->value = btn_debounce(btn->pin);
-		return 0;
-	}
-
-	btn->value = btn_debounce(btn->pin);
-	if (btn->value == 0) {
+	} else {
 		btn->value = btn_debounce(btn->pin);
-		return 0;
+		if (btn->value == 1) {
+			btn->event = 1;
+		}
 	}
-
-	btn->event = 1;
 
 	return 0;
 }
