@@ -89,7 +89,6 @@ int animation(void)
 	init_fn(&sh_fn_list, sh_fns);
 
 	while (1) {
-//		btn_test();
 		usleep(500000);
 		if (end_app == 1) {
 			break;
