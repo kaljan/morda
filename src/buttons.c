@@ -74,6 +74,34 @@ void *ButtonThread(void *arg)
 		return NULL;
 	}
 
+	switch (bdsc->BtnType) {
+		case BTN_MENU:
+			printf("[%s:%d] Button \"MENU\" pressed;\n"
+				,__FUNCTION__, __LINE__);
+			break;
+
+		case BTN_UP:
+			printf("[%s:%d] Button \"UP\" pressed;\n"
+				,__FUNCTION__, __LINE__);
+			break;
+
+		case BTN_DOWN:
+			printf("[%s:%d] Button \"DOWN\" pressed;\n"
+				,__FUNCTION__, __LINE__);
+
+			break;
+
+		case BTN_EXIT:
+			printf("[%s:%d] Button \"EXIT\" pressed;\n"
+				,__FUNCTION__, __LINE__);
+			break;
+
+		default:
+			printf("[%s:%d] Button \"UNKNOWN\" pressed;\n"
+				,__FUNCTION__, __LINE__);
+			break;
+	}
+
 	return arg;
 }
 
