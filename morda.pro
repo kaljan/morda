@@ -13,12 +13,14 @@ SOURCES += \
     src/ssd1311/ssd1311.c \
     src/periph/gpio.c \
     src/periph/i2c.c \
-    src/btn.c
+    src/btn.c \
+    src/buttons.c
 
 HEADERS += \
     src/si.h \
     src/ssd1311/ssd1311.h \
-    src/periph/periph.h
+    src/periph/periph.h \
+    src/buttons.h
 
 DISTFILES += \
 	Makefile \

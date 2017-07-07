@@ -125,3 +125,26 @@ int gpio_get_value(int pin)
 	return atoi(v);
 }
 
+GPIO_State GPIO_Debounce(int pin)
+{
+	int debounce_cnt = GPIO_DEBOUNCE_INIT;
+
+	while (1) {
+		if (gpio_get_value(pin) == 1) {
+			debounce_cnt++;
+		} else if (gpio_get_value(pin) == 0) {
+			debounce_cnt--;
+		} else {
+			return GPIO_HIGH;
+		}
+
+		if (debounce_cnt > GPIO_DEBOUNCE_MAX) {
+			return GPIO_HIGH;
+		}
+
+		if (debounce_cnt < GPIO_DEBOUNCE_MIN) {
+			return GPIO_LOW;
+		}
+	}
+
+}
