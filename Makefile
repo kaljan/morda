@@ -35,11 +35,7 @@ ssd1311.o : src/ssd1311/ssd1311.c src/ssd1311/ssd1311.h src/periph/periph.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/ssd1311/ssd1311.c
 
 buttons.o : src/buttons.c src/buttons.h src/periph/periph.h
-<<<<<<< HEAD
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/buttons.c
-=======
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/buttons.c.
->>>>>>> 604a12688af1ec978e7719eb9be3628b29e43c50
 
 si.o : src/si.c src/si.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/si.c
