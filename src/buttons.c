@@ -76,32 +76,32 @@ void *ButtonThread(void *arg)
 
 	switch (bdsc->BtnType) {
 		case BTN_MENU:
-			printf("[%s:%d] Button \"MENU\" pressed;\n"
-				,__FUNCTION__, __LINE__);
+			printf("[%s:%d] Button \"MENU\" pressed (%d);\n"
+				,__FUNCTION__, __LINE__, bdsc->BtnPrsCnt);
 			break;
 
 		case BTN_UP:
-			printf("[%s:%d] Button \"UP\" pressed;\n"
-				,__FUNCTION__, __LINE__);
+			printf("[%s:%d] Button \"UP\" pressed (%d);\n"
+				,__FUNCTION__, __LINE__, bdsc->BtnPrsCnt);
 			break;
 
 		case BTN_DOWN:
-			printf("[%s:%d] Button \"DOWN\" pressed;\n"
-				,__FUNCTION__, __LINE__);
+			printf("[%s:%d] Button \"DOWN\" pressed (%d);\n"
+				,__FUNCTION__, __LINE__, bdsc->BtnPrsCnt);
 
 			break;
 
 		case BTN_EXIT:
-			printf("[%s:%d] Button \"EXIT\" pressed;\n"
-				,__FUNCTION__, __LINE__);
+			printf("[%s:%d] Button \"EXIT\" pressed (%d);\n"
+				,__FUNCTION__, __LINE__, bdsc->BtnPrsCnt);
 			break;
 
 		default:
-			printf("[%s:%d] Button \"UNKNOWN\" pressed;\n"
-				,__FUNCTION__, __LINE__);
+			printf("[%s:%d] Button \"UNKNOWN\" pressed (%d);\n"
+				,__FUNCTION__, __LINE__, bdsc->BtnPrsCnt);
 			break;
 	}
-
+	bdsc->BtnPrsCnt++;
 	return arg;
 }
 
@@ -144,6 +144,7 @@ int CreateButton(ButtonDescriptor **bdsc, int pin, ButtonType btype)
 	(*bdsc)->BtnType = btype;
 	(*bdsc)->BtnState = GPIO_HIGH;
 	(*bdsc)->BtnSignal = B_NO_SIGNAL;
+	(*bdsc)->BtnPrsCnt = 0;
 
 	return 0;
 }
