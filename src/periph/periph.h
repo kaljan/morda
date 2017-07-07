@@ -1,7 +1,7 @@
 #ifndef PERIPH_H
 #define PERIPH_H
 
-
+#include <string.h>
 #include <stdint.h>
 
 
@@ -26,5 +26,6 @@ int gpio_set_value(int pin, int value);
 int gpio_get_value(int pin);
 
 int i2c_send_data(uint8_t addr, const uint8_t *buf, int size);
+GPIO_State GPIO_Debounce(int pin);
 
 #endif // PERIPH_H

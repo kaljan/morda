@@ -34,7 +34,7 @@ i2c.o : src/periph/i2c.c src/periph/periph.h
 ssd1311.o : src/ssd1311/ssd1311.c src/ssd1311/ssd1311.h src/periph/periph.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/ssd1311/ssd1311.c
 
-buttons.o : src/buttons.c src/buttons.h src/periph/periph.h
+buttons.o : src/buttons.c src/buttons.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/buttons.c
 
 si.o : src/si.c src/si.h

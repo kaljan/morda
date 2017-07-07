@@ -3,6 +3,79 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <pthread.h>
+
+
+struct ButtonList *buttonList;
+ButtonDescriptor *bdsc;
+pthread_t buttonThread;
+
+
+int ButtonHandler(ButtonDescriptor *button)
+{
+	GPIO_State state;
+	if (button == 0) {
+		printf("[%s:%d] Btton Handle error;\n"
+			,__FUNCTION__, __LINE__);
+
+		return -1;
+	}
+
+	state = GPIO_Debounce(button->BtnPin);
+
+	if (button->BtnState == GPIO_HIGH) {
+		if (state == GPIO_LOW) {
+			button->BtnState = GPIO_LOW;
+		}
+		return 0;
+	}
+
+	if (state == GPIO_HIGH) {
+		button->BtnState = GPIO_HIGH;
+		button->BtnSignal = B_PRESSED;
+		return 0;
+	}
+	return 0;
+}
+
+ButtonDescriptor *getButtonDescriptor(struct ButtonList *list)
+{
+	ButtonDescriptor *dsc = NULL;
+
+	while (list) {
+		if (ButtonHandler(list->BtnDsc) != 0) {
+			printf("[%s:%d] Failed;\n"
+				,__FUNCTION__, __LINE__);
+			break;
+		}
+
+		if (list->BtnDsc->BtnState == GPIO_LOW) {
+			dsc = list->BtnDsc;
+			break;
+		}
+
+		list = list->next;
+	}
+
+	return dsc;
+}
+
+void *ButtonThread(void *arg)
+{
+	if (bdsc == NULL) {
+		bdsc = getButtonDescriptor(buttonList);
+		return NULL;
+	}
+
+	if (ButtonHandler(bdsc) != 0) {
+		printf("[%s:%d] Failed;\n"
+			,__FUNCTION__, __LINE__);
+		return NULL;
+	}
+
+	return arg;
+}
 
 int InitButtonInput(int pin)
 {
@@ -49,7 +122,7 @@ int CreateButton(ButtonDescriptor **bdsc, int pin, ButtonType btype)
 
 int AddButtonToList(struct ButtonList **blist, int pin, ButtonType btype)
 {
-	struct ButtonList *bptr;
+	struct ButtonList **bptr;
 
 	if (blist == NULL) {
 		printf("[%s:%d] Create button list failed: NULL Pointer;\n"
@@ -57,18 +130,18 @@ int AddButtonToList(struct ButtonList **blist, int pin, ButtonType btype)
 		return -1;
 	}
 
-	bptr = *blist;
-	while (bptr) {
-		bptr = bptr->next;
+	bptr = blist;
+	while (*bptr) {
+		*bptr = (*bptr)->next;
 	}
 
-	if ((*blist = malloc(sizeof(struct ButtonList))) == NULL) {
+	if ((*bptr = malloc(sizeof(struct ButtonList))) == NULL) {
 		printf("[%s:%d] Create button list failed: Memory allocate error;\n"
 			,__FUNCTION__, __LINE__);
 		return -1;
 	}
-	(*blist)->BtnDsc = NULL;
-	(*blist)->next = NULL;
+	(*bptr)->BtnDsc = NULL;
+	(*bptr)->next = NULL;
 
 
 	if (CreateButton(&((*blist)->BtnDsc), pin, btype) != 0) {
@@ -82,5 +155,40 @@ int AddButtonToList(struct ButtonList **blist, int pin, ButtonType btype)
 
 int ButtonsInit(void)
 {
+	int ret;
+
+	buttonList = NULL;
+	bdsc = NULL;
+
+	if (AddButtonToList(&buttonList, 25, BTN_MENU) != 0) {
+		printf("[%s:%d] ButtonsInit failed;\n"
+			,__FUNCTION__, __LINE__);
+		return -1;
+	}
+
+	if (AddButtonToList(&buttonList, 22, BTN_UP) != 0) {
+		printf("[%s:%d] ButtonsInit failed;\n"
+			,__FUNCTION__, __LINE__);
+		return -1;
+	}
+
+	if (AddButtonToList(&buttonList, 27, BTN_DOWN) != 0) {
+		printf("[%s:%d] ButtonsInit failed;\n"
+			,__FUNCTION__, __LINE__);
+		return -1;
+	}
+
+	if (AddButtonToList(&buttonList, 17, BTN_EXIT) != 0) {
+		printf("[%s:%d] ButtonsInit failed;\n"
+			,__FUNCTION__, __LINE__);
+		return -1;
+	}
+
+	if ((ret = pthread_create(&buttonThread, NULL, ButtonThread, NULL)) != 0) {
+		printf("[%s:%d] Creating button thread failed: %s\n"
+			, __func__, __LINE__, strerror(ret));
+		return -1;
+	}
+
 	return 0;
 }
