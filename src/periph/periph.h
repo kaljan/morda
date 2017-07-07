@@ -5,6 +5,17 @@
 #include <stdint.h>
 
 
+#define GPIO_DEBOUNCE_INIT	1024
+#define GPIO_DEBOUNCE_MAX	1536
+#define GPIO_DEBOUNCE_MIN	512
+
+
+typedef enum _GPIO_State {
+	GPIO_LOW = 0,
+	GPIO_HIGH
+} GPIO_State;
+
+
 int gpio_write(const char *gpio_path, const char *value);
 int gpio_read(const char *gpio_path, char *value, size_t size);
 
