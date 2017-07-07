@@ -31,4 +31,4 @@ struct ButtonList {
 
 int ButtonsInit(void);
 
-#endif BUTTONS_H
+#endif // BUTTONS_H
