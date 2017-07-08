@@ -30,6 +30,17 @@ struct ButtonList {
 	struct ButtonList *next;
 };
 
-int ButtonsInit(void);
+typedef int (*ButtonCallback)(void* context);
+
+typedef struct _Button {
+	int bPin;
+	ButtonType bType;
+	ButtonCallback bCallback;
+} Button;
+
+int ButtonsInit(Button *button);
+int ButtonProcessStart(void);
+int ButtonProcessStop(void);
+int ButtonsDeinit(void);
 
 #endif // BUTTONS_H

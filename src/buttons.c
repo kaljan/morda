@@ -333,7 +333,7 @@ void printButtonList(struct ButtonList *btnlist)
 	}
 }
 
-int ButtonsInit(void)
+int ButtonsInit(Button *button)
 {
 //	int ret;
 	struct _button_t *btnptr = buttons;
@@ -395,3 +395,18 @@ int ButtonsInit(void)
 //			,__FUNCTION__, __LINE__);
 //		return -1;
 //	}
+
+int ButtonProcessStart()
+{
+
+}
+
+int ButtonProcessStop()
+{
+
+}
+
+int ButtonsDeinit()
+{
+
+}

@@ -18,7 +18,7 @@ static void catch_signal(int sig)
 int main(int argc, char **argv)
 {
 #if 1
-	ButtonsInit();
+	ButtonsInit(NULL);
 #else
 
 	end_app = 0;
