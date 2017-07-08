@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 
+#include "buttons.h"
 
 int end_app;
 
@@ -16,12 +17,16 @@ static void catch_signal(int sig)
 
 int main(int argc, char **argv)
 {
+#if 1
+	ButtonsInit();
+#else
+
 	end_app = 0;
 	signal(SIGQUIT, catch_signal);
 
 	animation();
 
 	printf("Exit\n");
-
+#endif
 	return 0;
 }
