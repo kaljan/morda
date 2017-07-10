@@ -19,6 +19,7 @@ int main(int argc, char **argv)
 {
 #if 1
 	ButtonsInit(NULL);
+	ButtonsDeinit();
 #else
 
 	end_app = 0;

@@ -158,11 +158,11 @@ int CreateButton(ButtonDescriptor **bdsc, int pin, ButtonType btype)
 	printf("[%s:%d] Init GPIO input\n"
 		,__FUNCTION__, __LINE__);
 
-	if (InitButtonInput(pin) != 0) {
-		printf("[%s:%d] Create button failed: GPIO error;\n"
-			, __FUNCTION__, __LINE__);
-		return -1;
-	}
+//	if (InitButtonInput(pin) != 0) {
+//		printf("[%s:%d] Create button failed: GPIO error;\n"
+//			, __FUNCTION__, __LINE__);
+//		return -1;
+//	}
 
 	printf("[%s:%d] Init gpio descriptor\n"
 		,__FUNCTION__, __LINE__);
@@ -361,8 +361,10 @@ int ButtonsInit(Button *button)
 		btnptr++;
 		printf("\n");
 	}
-
 	printButtonList(buttonList);
+
+	printf("\nbuttonList = %p\n", buttonList);
+
 #if 0
 	if ((ret = pthread_create(&buttonThread, NULL, ButtonThread, NULL)) != 0) {
 		printf("[%s:%d] Creating button thread failed: %s\n"
@@ -395,8 +397,21 @@ int ButtonListPopBack(struct ButtonList **list)
 		return 0;
 	}
 
+	printf("[%s:%d] List OK;\n"
+		,__FUNCTION__, __LINE__);
+
 	first = *list;
 	prev = first;
+
+	printf(
+	"list : %p\n"
+	"first: %p\n"
+	"prev : %p\n"
+	, *list, first, prev
+	);
+
+	printf("[%s:%d] Go to end of list;\n"
+		,__FUNCTION__, __LINE__);
 
 	// Идём в конец списка
 	while ((*list)->next) {
@@ -404,16 +419,49 @@ int ButtonListPopBack(struct ButtonList **list)
 		(*list) = (*list)->next;
 	}
 
-	if (prev == first) {
-		// Это единственный элемент в списке. тут мы его и грохнем.
-	}
+	printf(
+	"list : %p\n"
+	"first: %p\n"
+	"prev : %p\n"
+	, *list, first, prev
+	);
 
-	if (gpio_unexport(first->BtnDsc->BtnPin) != 0) {
-		printf("[%s:%d] GPIO unexport failed;\n"
-			,__FUNCTION__, __LINE__);
-	}
+//	printf("[%s:%d] Unexport GPIO;\n"
+//		,__FUNCTION__, __LINE__);
+
+//	if (gpio_unexport((*list)->BtnDsc->BtnPin) != 0) {
+//		printf("[%s:%d] GPIO unexport failed;\n"
+//			,__FUNCTION__, __LINE__);
+//	}
+
+	printf("[%s:%d] Destroy button descriptor (%p);\n"
+		,__FUNCTION__, __LINE__, (*list)->BtnDsc);
 
 	free((*list)->BtnDsc);
+	(*list)->BtnDsc = 0;
+
+	if (prev == first) {
+		// Это единственный элемент в списке. тут мы его и грохнем.
+		printf("[%s:%d] Destroy list;\n"
+			,__FUNCTION__, __LINE__);
+		free(*list);
+		return 0;
+	}
+
+	printf("[%s:%d] Destroy item (%p) first element (%p);\n"
+		,__FUNCTION__, __LINE__, prev->next, first);
+
+	*list = first;
+
+	free(prev->next);
+
+	printf(
+	"list : %p\n"
+	"first: %p\n"
+	"prevn: %p\n"
+	, *list, first, prev->next
+	);
+	prev->next = NULL;
 
 
 	return 0;
@@ -421,7 +469,19 @@ int ButtonListPopBack(struct ButtonList **list)
 
 int ButtonsDeinit(void)
 {
-	struct ButtonList *btnptr;
+//	struct ButtonList *btnptr;
+
+	int i = 0;
+
+	while (buttonList) {
+		printf("\n[%s:%d] pop back item %d (%p);\n"
+			,__FUNCTION__, __LINE__, i++, buttonList);
+		if (ButtonListPopBack(&buttonList) != 0) {
+			printf("[%s:%d] Pop failed;\n"
+				,__FUNCTION__, __LINE__);
+			return -1;
+		}
+	}
 
 	return 0;
 }
