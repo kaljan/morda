@@ -158,11 +158,11 @@ int CreateButton(ButtonDescriptor **bdsc, int pin, ButtonType btype)
 	printf("[%s:%d] Init GPIO input\n"
 		,__FUNCTION__, __LINE__);
 
-//	if (InitButtonInput(pin) != 0) {
-//		printf("[%s:%d] Create button failed: GPIO error;\n"
-//			, __FUNCTION__, __LINE__);
-//		return -1;
-//	}
+	if (InitButtonInput(pin) != 0) {
+		printf("[%s:%d] Create button failed: GPIO error;\n"
+			, __FUNCTION__, __LINE__);
+		return -1;
+	}
 
 	printf("[%s:%d] Init gpio descriptor\n"
 		,__FUNCTION__, __LINE__);
@@ -361,6 +361,7 @@ int ButtonsInit(Button *button)
 		btnptr++;
 		printf("\n");
 	}
+
 	printButtonList(buttonList);
 #if 0
 	if ((ret = pthread_create(&buttonThread, NULL, ButtonThread, NULL)) != 0) {
@@ -372,41 +373,55 @@ int ButtonsInit(Button *button)
 	return 0;
 }
 
-//	if (AddButtonToList(&buttonList, 25, BTN_MENU) != 0) {
-//		printf("[%s:%d] ButtonsInit failed;\n"
-//			,__FUNCTION__, __LINE__);
-//		return -1;
-//	}
-
-//	if (AddButtonToList(&buttonList, 22, BTN_UP) != 0) {
-//		printf("[%s:%d] ButtonsInit failed;\n"
-//			,__FUNCTION__, __LINE__);
-//		return -1;
-//	}
-
-//	if (AddButtonToList(&buttonList, 27, BTN_DOWN) != 0) {
-//		printf("[%s:%d] ButtonsInit failed;\n"
-//			,__FUNCTION__, __LINE__);
-//		return -1;
-//	}
-
-//	if (AddButtonToList(&buttonList, 17, BTN_EXIT) != 0) {
-//		printf("[%s:%d] ButtonsInit failed;\n"
-//			,__FUNCTION__, __LINE__);
-//		return -1;
-//	}
-
-int ButtonProcessStart()
+int ButtonProcessStart(void)
 {
-
+	return 0;
 }
 
-int ButtonProcessStop()
+int ButtonProcessStop(void)
 {
-
+	return 0;
 }
 
-int ButtonsDeinit()
+int ButtonListPopBack(struct ButtonList **list)
 {
+	struct ButtonList *first, *prev;
 
+	if (list == 0) {
+		return -1;
+	}
+
+	if (*list == 0) {
+		return 0;
+	}
+
+	first = *list;
+	prev = first;
+
+	// Идём в конец списка
+	while ((*list)->next) {
+		prev = (*list);
+		(*list) = (*list)->next;
+	}
+
+	if (prev == first) {
+		// Это единственный элемент в списке. тут мы его и грохнем.
+	}
+
+	if (gpio_unexport(first->BtnDsc->BtnPin) != 0) {
+		printf("[%s:%d] GPIO unexport failed;\n"
+			,__FUNCTION__, __LINE__);
+	}
+
+	free((*list)->BtnDsc);
+
+
+	return 0;
+}
+
+int ButtonsDeinit(void)
+{
+	struct ButtonList *btnptr;
+
+	return 0;
 }
