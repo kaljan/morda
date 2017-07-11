@@ -335,7 +335,6 @@ void printButtonList(struct ButtonList *btnlist)
 
 int ButtonsInit(Button *button)
 {
-//	int ret;
 	struct _button_t *btnptr = buttons;
 	char str[16];
 
@@ -371,6 +370,7 @@ int ButtonsInit(Button *button)
 
 int ButtonProcessStart(void)
 {
+	int ret;
 	if ((ret = pthread_create(&buttonThread, NULL, ButtonThread, NULL)) != 0) {
 		printf("[%s:%d] Creating button thread failed: %s\n"
 			, __func__, __LINE__, strerror(ret));
