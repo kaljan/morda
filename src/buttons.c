@@ -445,6 +445,7 @@ int ButtonListPopBack(struct ButtonList **list)
 		printf("[%s:%d] Destroy list;\n"
 			,__FUNCTION__, __LINE__);
 		free(*list);
+		*list = 0;
 		return 0;
 	}
 
