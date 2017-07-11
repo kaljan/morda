@@ -133,107 +133,6 @@ int InitButtonInput(int pin)
 	return 0;
 }
 
-int CreateButton(ButtonDescriptor **bdsc, int pin, ButtonType btype)
-{
-	printf("[%s:%d] Creating button\n"
-		,__FUNCTION__, __LINE__);
-
-	if (bdsc == NULL) {
-		printf("[%s:%d] Create button failed: NULL pointer;\n"
-			, __FUNCTION__, __LINE__);
-		return -1;
-	}
-
-	printf("[%s:%d] Allocate button descriptor\n"
-		,__FUNCTION__, __LINE__);
-
-	if (*bdsc == NULL) {
-		if ((*bdsc = malloc(sizeof(ButtonDescriptor))) == NULL) {
-			printf("[%s:%d] Create button failed: Memory allocate error;\n"
-				, __FUNCTION__, __LINE__);
-			return -1;
-		}
-	}
-
-	printf("[%s:%d] Init GPIO input\n"
-		,__FUNCTION__, __LINE__);
-
-//	if (InitButtonInput(pin) != 0) {
-//		printf("[%s:%d] Create button failed: GPIO error;\n"
-//			, __FUNCTION__, __LINE__);
-//		return -1;
-//	}
-
-	printf("[%s:%d] Init gpio descriptor\n"
-		,__FUNCTION__, __LINE__);
-
-	(*bdsc)->BtnPin = pin;
-	(*bdsc)->BtnType = btype;
-	(*bdsc)->BtnState = GPIO_HIGH;
-	(*bdsc)->BtnSignal = B_NO_SIGNAL;
-	(*bdsc)->BtnPrsCnt = 0;
-
-	return 0;
-}
-
-int CreateItem(struct ButtonList **blist, int pin, ButtonType btype)
-{
-	if ((*blist = malloc(sizeof(struct ButtonList))) == NULL) {
-		printf("[%s:%d] Create button list failed: Memory allocate error;\n"
-			,__FUNCTION__, __LINE__);
-		return -1;
-	}
-
-	(*blist)->BtnDsc = NULL;
-	(*blist)->next = NULL;
-
-	if (CreateButton(&((*blist)->BtnDsc), pin, btype) != 0) {
-		printf("[%s:%d] Create button list failed: Create button error;\n"
-			,__FUNCTION__, __LINE__);
-		return -1;
-	}
-
-	return 0;
-}
-
-int AddButtonToList(struct ButtonList **blist, int pin, ButtonType btype)
-{
-	struct ButtonList *first;
-
-	if (blist == NULL) {
-		printf("[%s:%d] Create button list failed: NULL Pointer;\n"
-			,__FUNCTION__, __LINE__);
-		return -1;
-	}
-
-	if (*blist == 0) { // Список не создан
-		printf("[%s:%d] Creating first element\n"
-			,__FUNCTION__, __LINE__);
-		// Создаём список
-		if (CreateItem(blist, pin, btype) != 0) {
-			return -1;
-		}
-		return 0;
-	}
-
-	printf("[%s:%d] Creating next element\n"
-		,__FUNCTION__, __LINE__);
-
-	first = *blist;
-	while ((*blist)->next) {
-		printf("[%s:%d] Go to last element [%p]\n"
-			,__FUNCTION__, __LINE__, *blist);
-		*blist = (*blist)->next;
-	}
-
-	if (CreateItem(&((*blist)->next), pin, btype) != 0) {
-		return -1;
-	}
-
-	*blist = first;
-	return 0;
-}
-
 void getButtonType(char *str, ButtonType btype)
 {
 	switch (btype) {
@@ -333,6 +232,71 @@ void printButtonList(struct ButtonList *btnlist)
 	}
 }
 
+int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype)
+{
+	if ((*button = malloc(sizeof(ButtonDescriptor))) == NULL) {
+		printf("[%s:%d] Create button failed: Memory allocate error;\n"
+			, __FUNCTION__, __LINE__);
+		return -1;
+	}
+
+	(*button)->BtnPin = pin;
+	(*button)->BtnType = btype;
+	(*button)->BtnState = GPIO_HIGH;
+	(*button)->BtnSignal = B_NO_SIGNAL;
+	(*button)->BtnPrsCnt = 0;
+
+	if (InitButtonInput(pin) != 0) {
+		printf("[%s:%d] Create button failed: GPIO error;\n"
+			, __FUNCTION__, __LINE__);
+		return -1;
+	}
+
+	return 0;
+}
+
+int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype)
+{
+	struct ButtonList *first = NULL;
+
+	if (list == NULL) {
+		printf("[%s:%d] Create button list failed: NULL Pointer;\n"
+			,__FUNCTION__, __LINE__);
+		return -1;
+	}
+
+	if (*list == 0) { // Список не создан
+		// Создаём список
+		if ((*list = malloc(sizeof(struct ButtonList))) == NULL) {
+			printf("[%s:%d] Create button list failed: Memory allocate error;\n"
+				,__FUNCTION__, __LINE__);
+			return -1;
+		}
+	} else {
+		first = *list;
+		while ((*list)->next) {
+			*list = (*list)->next;
+		}
+
+		if (((*list)->next = malloc(sizeof(struct ButtonList))) == NULL) {
+			printf("[%s:%d] Create button list failed: Memory allocate error;\n"
+				,__FUNCTION__, __LINE__);
+			return -1;
+		}
+		*list = (*list)->next;
+	}
+
+	if (CreateButton(&((*list)->BtnDsc), pin, btype) != 0) {
+		return -1;
+	}
+
+	if (first != NULL) {
+		*list = first;
+	}
+
+	return 0;
+}
+
 int ButtonsInit(Button *button)
 {
 	struct _button_t *btnptr = buttons;
@@ -341,15 +305,9 @@ int ButtonsInit(Button *button)
 	buttonList = NULL;
 	buttonDescriptor = NULL;
 
-	printf("[%s:%d] Start init buttons;\n"
-		,__FUNCTION__, __LINE__);
-
 	while (btnptr->BtnPin != -1) {
 
 		getButtonType(str, btnptr->BtnType);
-		printf("[%s:%d] Adding %s on GPIO%d;\n"
-			,__FUNCTION__, __LINE__, str, btnptr->BtnPin);
-
 
 		if (AddButtonToList(&buttonList, btnptr->BtnPin,
 				btnptr->BtnType) != 0) {
@@ -361,9 +319,6 @@ int ButtonsInit(Button *button)
 		printf("\n");
 	}
 	printButtonList(buttonList);
-
-	printf("\nbuttonList = %p\n", buttonList);
-
 
 	return 0;
 }
@@ -385,30 +340,34 @@ int ButtonProcessStop(void)
 	return 0;
 }
 
-int DestroyButtonDescriptor(ButtonDescriptor ** button)
+int DestroyButton(ButtonDescriptor ** button)
 {
 	if (button == 0) {
+		printf("[%s:%d] GPIO unexport failed;\n"
+			,__FUNCTION__, __LINE__);
 		return -1;
 	}
 
 	if (*button == 0) {
+		printf("[%s:%d] GPIO unexport failed;\n"
+			,__FUNCTION__, __LINE__);
 		return 0;
 	}
 
-	//	printf("[%s:%d] Unexport GPIO;\n"
-	//		,__FUNCTION__, __LINE__);
+	printf("[%s:%d] GPIO%d unexport;\n"
+		,__FUNCTION__, __LINE__, (*button)->BtnPin);
 
-	//	if (gpio_unexport((*list)->BtnDsc->BtnPin) != 0) {
-	//		printf("[%s:%d] GPIO unexport failed;\n"
-	//			,__FUNCTION__, __LINE__);
-	//	}
+	if (gpio_unexport((*button)->BtnPin) != 0) {
+		printf("[%s:%d] GPIO unexport failed;\n"
+			,__FUNCTION__, __LINE__);
+	}
 
 	free(*button);
 	*button = 0;
 	return 0;
 }
 
-int ButtonListPopBack(struct ButtonList **list)
+int RemoveButtonFromList(struct ButtonList **list)
 {
 	struct ButtonList *first, *prev;
 
@@ -420,104 +379,44 @@ int ButtonListPopBack(struct ButtonList **list)
 		return 0;
 	}
 
-	printf("[%s:%d] List OK;\n"
-		,__FUNCTION__, __LINE__);
-
 	first = *list;
 	prev = first;
 
-	printf(
-	"list : %p\n"
-	"first: %p\n"
-	"prev : %p\n"
-	, *list, first, prev
-	);
-
-	printf("[%s:%d] Go to end of list;\n"
-		,__FUNCTION__, __LINE__);
-
-	// Идём в конец списка
 	while ((*list)->next) {
+		printf("[%s:%d] Go to last element;\n"
+			,__FUNCTION__, __LINE__);
 		prev = (*list);
 		(*list) = (*list)->next;
 	}
 
-	printf(
-	"list : %p\n"
-	"first: %p\n"
-	"prev : %p\n"
-	, *list, first, prev
-	);
+	DestroyButton(&((*list)->BtnDsc));
 
-//	printf("[%s:%d] Unexport GPIO;\n"
-//		,__FUNCTION__, __LINE__);
-
-//	if (gpio_unexport((*list)->BtnDsc->BtnPin) != 0) {
-//		printf("[%s:%d] GPIO unexport failed;\n"
-//			,__FUNCTION__, __LINE__);
-//	}
-
-	printf("[%s:%d] Destroy button descriptor (%p);\n"
-		,__FUNCTION__, __LINE__, (*list)->BtnDsc);
-
-//	free((*list)->BtnDsc);
-//	(*list)->BtnDsc = 0;
-
-	DestroyButtonDescriptor(&((*list)->BtnDsc));
-
-	if (prev == first) {
-		// Это единственный элемент в списке. тут мы его и грохнем.
-		printf("[%s:%d] Destroy list;\n"
-			,__FUNCTION__, __LINE__);
+	if ((*list) == first) {
 		free(*list);
 		*list = 0;
 		return 0;
 	}
 
-	printf("[%s:%d] Destroy item (%p) first element (%p);\n"
-		,__FUNCTION__, __LINE__, prev->next, first);
-
-	printf(
-	"list : %p\n"
-	"first: %p\n"
-	"prevn: %p\n"
-	, *list, first, prev->next
-	);
-
 	*list = first;
 
 	free(prev->next);
-
-	printf(
-	"list : %p\n"
-	"first: %p\n"
-	"prevn: %p\n"
-	, *list, first, prev->next
-	);
 	prev->next = NULL;
-
 
 	return 0;
 }
 
 int ButtonsDeinit(void)
 {
-//	struct ButtonList *btnptr;
-
 	int i = 0;
 
 	while (buttonList) {
-		printf("\n[%s:%d] pop back item %d (%p);\n"
-			,__FUNCTION__, __LINE__, i++, buttonList);
-		if (ButtonListPopBack(&buttonList) != 0) {
+		printf("\nRemove item %d\n", i++);
+		if (RemoveButtonFromList(&buttonList) != 0) {
 			printf("[%s:%d] Pop failed;\n"
 				,__FUNCTION__, __LINE__);
 			return -1;
 		}
 	}
-
-	printf("\n[%s:%d] FINISHED;\n"
-		,__FUNCTION__, __LINE__, i++, buttonList);
 
 	return 0;
 }
