@@ -18,15 +18,15 @@ typedef enum _ButtonSignalType {
 } ButtonSignalTpye;
 
 typedef struct _ButtonDescriptor {
-	int BtnPin;
-	ButtonType BtnType;
-	GPIO_State BtnState;
-	ButtonSignalTpye BtnSignal;
+	int buttonPin;
+	ButtonType buttonType;
+	GPIO_State buttonsState;
+	ButtonSignalTpye buttonSignal;
 	int BtnPrsCnt;
 } ButtonDescriptor;
 
 struct ButtonList {
-	ButtonDescriptor *BtnDsc;
+	ButtonDescriptor *buttonDescriptor;
 	struct ButtonList *next;
 };
 

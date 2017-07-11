@@ -16,16 +16,16 @@ typedef enum _GPIO_State {
 } GPIO_State;
 
 
-int gpio_write(const char *gpio_path, const char *value);
-int gpio_read(const char *gpio_path, char *value, size_t size);
+int GPIO_Write(const char *gpio_path, const char *value);
+int GPIO_Read(const char *gpio_path, char *value, size_t size);
 
-int gpio_export(int pin);
-int gpio_unexport(int pin);
-int gpio_set_direction(int pin, const char *directoin);
-int gpio_set_value(int pin, int value);
-int gpio_get_value(int pin);
+int GPIO_Export(int pin);
+int GPIO_Unexport(int pin);
+int GPIO_SetDirection(int pin, const char *directoin);
+int GPIO_SetValue(int pin, int value);
+int GPIO_GetValue(int pin);
 
-int i2c_send_data(uint8_t addr, const uint8_t *buf, int size);
+int I2C_SendData(uint8_t addr, const uint8_t *buf, int size);
 GPIO_State GPIO_Debounce(int pin);
 
 #endif // PERIPH_H

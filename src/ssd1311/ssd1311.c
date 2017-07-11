@@ -11,7 +11,7 @@
 #define SSD1311_INIT_SEQ_SIZE	24
 
 
-static const uint8_t ssd1311_init_seq[SSD1311_INIT_SEQ_SIZE] = {
+static const uint8_t SSD1311_InitSequence[SSD1311_INIT_SEQ_SIZE] = {
 	0x80, SSD1311_CTRL,
 	0x80, SSD1311_FNSET | SSD1311_FNSET_N | SSD1311_FNSET_RE,
 	0x80, SSD1311_EX_CHZ | SSD1311_EX_CHZ_SD,
@@ -26,56 +26,56 @@ static const uint8_t ssd1311_init_seq[SSD1311_INIT_SEQ_SIZE] = {
 	0x00, SSD1311_DDRAM_ADDR,
 };
 
-static const uint8_t ssd1311_on_seq[2] = {0x00, 0x0C};
-static uint8_t ssd1311_packet[68];
-static char ssd1311_str[33];
+static const uint8_t SSD1311_OnSequence[2] = {0x00, 0x0C};
+static uint8_t SSD1311_Packet[68];
+static char SSD1311_String[33];
 
 
-static int ssd1311_reset(void)
+static int SSD1311_Reset(void)
 {
-	if (gpio_export(18) != 0) {
+	if (GPIO_Export(18) != 0) {
 		return -1;
 	}
 
-	if (gpio_set_direction(18, "out") != 0) {
+	if (GPIO_SetDirection(18, "out") != 0) {
 		return -1;
 	}
 
-	if (gpio_set_value(18, 1) != 0) {
-		return -1;
-	}
-
-	usleep(50000);
-
-	if (gpio_set_value(18, 0) != 0) {
+	if (GPIO_SetValue(18, 1) != 0) {
 		return -1;
 	}
 
 	usleep(50000);
 
-	if (gpio_set_value(18, 1) != 0) {
+	if (GPIO_SetValue(18, 0) != 0) {
+		return -1;
+	}
+
+	usleep(50000);
+
+	if (GPIO_SetValue(18, 1) != 0) {
 		return -1;
 	}
 
 	return 0;
 }
 
-int ssd1311_init(void)
+int SSD1311_Init(void)
 {
-	if (ssd1311_reset() != 0) {
+	if (SSD1311_Reset() != 0) {
 		printf("[%s:%d] Reset SSD1311 failed\n", __func__, __LINE__);
 		return -1;
 	}
 
-	memset(ssd1311_str, ' ', 32);
+	memset(SSD1311_String, ' ', 32);
 
-	if (i2c_send_data(SSD1311_I2C_ADDR, ssd1311_init_seq,
+	if (I2C_SendData(SSD1311_I2C_ADDR, SSD1311_InitSequence,
 			SSD1311_INIT_SEQ_SIZE) != 0) {
 		printf("[%s:%d] SSD1311 Initialization failed\n", __func__, __LINE__);
 		return -1;
 	}
 
-	if (i2c_send_data(SSD1311_I2C_ADDR, ssd1311_on_seq, 2) != 0) {
+	if (I2C_SendData(SSD1311_I2C_ADDR, SSD1311_OnSequence, 2) != 0) {
 		printf("[%s:%d] Running SSD1311 failed\n", __func__, __LINE__);
 		return -1;
 	}
@@ -83,12 +83,12 @@ int ssd1311_init(void)
 	return 0;
 }
 
-int ssd1311_deinit(void)
+int SSD1311_Deinit(void)
 {
-	return gpio_unexport(18);
+	return GPIO_Unexport(18);
 }
 
-static void prepare_str(uint8_t *packet, const char *str)
+static void PrepareString(uint8_t *packet, const char *str)
 {
 	int i;
 	*packet = 0x80;
@@ -117,14 +117,14 @@ static void prepare_str(uint8_t *packet, const char *str)
 	}
 }
 
-int ssd1311_set_string(const char *str, int start)
+int SSD1311_SetString(const char *str, int start)
 {
 
 	int i;
 	char *sptr;
 
 	i = start;
-	sptr = &ssd1311_str[start];
+	sptr = &SSD1311_String[start];
 	while (*str != 0) {
 		*sptr = *str;
 		sptr++;
@@ -134,30 +134,30 @@ int ssd1311_set_string(const char *str, int start)
 			break;
 		}
 	}
-	prepare_str(ssd1311_packet, ssd1311_str);
-	return i2c_send_data(SSD1311_I2C_ADDR, ssd1311_packet, 68);
+	PrepareString(SSD1311_Packet, SSD1311_String);
+	return I2C_SendData(SSD1311_I2C_ADDR, SSD1311_Packet, 68);
 
 }
 
-int ssd1311_clear(void)
+int SSD1311_Clear(void)
 {
 	return 0;
 }
 
-int ssd1311_set_text(const char *text, int start, int size)
+int SSD1311_SetText(const char *text, int start, int size)
 {
-	memset(ssd1311_str, ' ', 32);
-	strncpy(&ssd1311_str[start], text, size);
+	memset(SSD1311_String, ' ', 32);
+	strncpy(&SSD1311_String[start], text, size);
 
-	prepare_str(ssd1311_packet, ssd1311_str);
-	return i2c_send_data(SSD1311_I2C_ADDR, ssd1311_packet, 68);
+	PrepareString(SSD1311_Packet, SSD1311_String);
+	return I2C_SendData(SSD1311_I2C_ADDR, SSD1311_Packet, 68);
 }
 
-int ssd1311_append_text(const char *text, int start, int size)
+int SSD1311_AppendText(const char *text, int start, int size)
 {
-	strncpy(&ssd1311_str[start], text, size);
+	strncpy(&SSD1311_String[start], text, size);
 
-	prepare_str(ssd1311_packet, ssd1311_str);
-	return i2c_send_data(SSD1311_I2C_ADDR, ssd1311_packet, 68);
+	PrepareString(SSD1311_Packet, SSD1311_String);
+	return I2C_SendData(SSD1311_I2C_ADDR, SSD1311_Packet, 68);
 }
 

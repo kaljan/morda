@@ -10,30 +10,30 @@
 
 #include "periph.h"
 
-const char i2c_fname[]="/dev/i2c-1";
-int i2c_fd;
+const char I2C_FileName[]="/dev/i2c-1";
+int I2C_Fd;
 
-int i2c_send_data(uint8_t addr, const uint8_t *buf, int size)
+int I2C_SendData(uint8_t addr, const uint8_t *buf, int size)
 {
-	if ((i2c_fd = open(i2c_fname, O_RDWR)) < 0) {
-		printf("Failed to open %s: %s\n", i2c_fname, strerror(errno));
+	if ((I2C_Fd = open(I2C_FileName, O_RDWR)) < 0) {
+		printf("Failed to open %s: %s\n", I2C_FileName, strerror(errno));
 		return -1;
 	}
 
-	if (ioctl(i2c_fd, I2C_SLAVE, addr) < 0) {
-		close(i2c_fd);
+	if (ioctl(I2C_Fd, I2C_SLAVE, addr) < 0) {
+		close(I2C_Fd);
 		printf("I2C Connection failed: %s\n", strerror(errno));
 		return -1;
 	}
 
-	if (write(i2c_fd, buf, size) < 0) {
-		close(i2c_fd);
+	if (write(I2C_Fd, buf, size) < 0) {
+		close(I2C_Fd);
 		printf("[%s, %d] I2C write failed: %s\n"
 		, __func__, __LINE__, strerror(errno));;
 		return -1;
 	}
 
-	close(i2c_fd);
+	close(I2C_Fd);
 
 	return 0;
 }

@@ -34,11 +34,11 @@ pthread_t _btn_thread;
 
 static int btn_cfg_in(int pin)
 {
-	if (gpio_export(pin) != 0) {
+	if (GPIO_Export(pin) != 0) {
 		return -1;
 	}
 
-	if (gpio_set_direction(pin, "in") != 0) {
+	if (GPIO_SetDirection(pin, "in") != 0) {
 		return -1;
 	}
 
@@ -51,7 +51,7 @@ static int btn_debounce(int pin)
 	volatile int val;
 
 	 do {
-		if (gpio_get_value(pin) == 0) {
+		if (GPIO_GetValue(pin) == 0) {
 			debounce_c++;
 			if (debounce_c < 512) {
 				continue;
@@ -128,7 +128,7 @@ int btn_deinit(void)
 	int i;
 	pthread_cancel(_btn_thread);
 	for (i = 0; i < NUMBER_BTNS; i++) {
-		if (gpio_unexport(btn_pins[i]) != 0) {
+		if (GPIO_Unexport(btn_pins[i]) != 0) {
 			printf("[%s:%d] BTN unexport failed\n"
 				, __func__, __LINE__);
 		}

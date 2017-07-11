@@ -73,15 +73,15 @@ int animation(void)
 
 	btn_init();
 
-	if (ssd1311_init() != 0) {
+	if (SSD1311_Init() != 0) {
 		printf("[%s:%d] SSD1311 init failed\n", __func__, __LINE__);
-		ssd1311_deinit();
+		SSD1311_Deinit();
 		return -1;
 	}
 
 	i = sprintf(lcd_str, "PID: %d", getpid());
 	memset(&lcd_str[i], ' ', 32 - i);
-	ssd1311_set_string(lcd_str, 0);
+	SSD1311_SetString(lcd_str, 0);
 	usleep(500000);
 
 	i = 0;
@@ -98,7 +98,7 @@ int animation(void)
 
 		(sh_fn_list->fn)();
 
-		ssd1311_set_string(lcd_str, 0);
+		SSD1311_SetString(lcd_str, 0);
 
 		i++;
 		if (i > 60) {
@@ -109,9 +109,9 @@ int animation(void)
 
 	sprintf(lcd_str, "EXIT");
 	memset(&lcd_str[4], ' ', 28);
-	ssd1311_set_string(lcd_str, 0);
+	SSD1311_SetString(lcd_str, 0);
 
-	if (ssd1311_deinit() != 0) {
+	if (SSD1311_Deinit() != 0) {
 		return -1;
 	}
 

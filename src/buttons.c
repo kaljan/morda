@@ -37,18 +37,18 @@ int ButtonHandler(ButtonDescriptor *button)
 		return -1;
 	}
 
-	state = GPIO_Debounce(button->BtnPin);
+	state = GPIO_Debounce(button->buttonPin);
 
-	if (button->BtnState == GPIO_HIGH) {
+	if (button->buttonsState == GPIO_HIGH) {
 		if (state == GPIO_LOW) {
-			button->BtnState = GPIO_LOW;
+			button->buttonsState = GPIO_LOW;
 		}
 		return 0;
 	}
 
 	if (state == GPIO_HIGH) {
-		button->BtnState = GPIO_HIGH;
-		button->BtnSignal = B_PRESSED;
+		button->buttonsState = GPIO_HIGH;
+		button->buttonSignal = B_PRESSED;
 		return 0;
 	}
 	return 0;
@@ -59,14 +59,14 @@ ButtonDescriptor *getButtonDescriptor(struct ButtonList *list)
 	ButtonDescriptor *dsc = NULL;
 
 	while (list) {
-		if (ButtonHandler(list->BtnDsc) != 0) {
+		if (ButtonHandler(list->buttonDescriptor) != 0) {
 			printf("[%s:%d] Failed;\n"
 				,__FUNCTION__, __LINE__);
 			break;
 		}
 
-		if (list->BtnDsc->BtnState == GPIO_LOW) {
-			dsc = list->BtnDsc;
+		if (list->buttonDescriptor->buttonsState == GPIO_LOW) {
+			dsc = list->buttonDescriptor;
 			break;
 		}
 
@@ -89,7 +89,7 @@ void *ButtonThread(void *arg)
 		return NULL;
 	}
 
-	switch (buttonDescriptor->BtnType) {
+	switch (buttonDescriptor->buttonType) {
 		case BTN_MENU:
 			printf("[%s:%d] Button \"MENU\" pressed (%d);\n"
 				,__FUNCTION__, __LINE__, buttonDescriptor->BtnPrsCnt);
@@ -122,11 +122,11 @@ void *ButtonThread(void *arg)
 
 int InitButtonInput(int pin)
 {
-	if (gpio_export(pin) != 0) {
+	if (GPIO_Export(pin) != 0) {
 		return -1;
 	}
 
-	if (gpio_set_direction(pin, "in") != 0) {
+	if (GPIO_SetDirection(pin, "in") != 0) {
 		return -1;
 	}
 
@@ -198,9 +198,9 @@ void ButtonDescriptorToStr(char *str, ButtonDescriptor *button)
 	char btn_state_str[16];
 	char btn_signal_str[16];
 
-	getButtonType(btn_type_str, button->BtnType);
-	getGPIO_State(btn_state_str, button->BtnState);
-	geButtonSignalTpye(btn_signal_str, button->BtnSignal);
+	getButtonType(btn_type_str, button->buttonType);
+	getGPIO_State(btn_state_str, button->buttonsState);
+	geButtonSignalTpye(btn_signal_str, button->buttonSignal);
 
 	sprintf(str,
 	"    Pin   : %d\n"
@@ -208,7 +208,7 @@ void ButtonDescriptorToStr(char *str, ButtonDescriptor *button)
 	"    State : %s\n"
 	"    Signal: %s\n"
 	"    Count : %d\n"
-	, button->BtnPin
+	, button->buttonPin
 	, btn_type_str
 	, btn_state_str
 	, btn_signal_str
@@ -224,8 +224,8 @@ void printButtonList(struct ButtonList *btnlist)
 	printf("\nbuttonList [%p]\n", btnlist);
 
 	while (btnlist) {
-		printf("  ButtonDescriptor [%p]\n", btnlist->BtnDsc);
-		ButtonDescriptorToStr(btn_dsc_str, btnlist->BtnDsc);
+		printf("  ButtonDescriptor [%p]\n", btnlist->buttonDescriptor);
+		ButtonDescriptorToStr(btn_dsc_str, btnlist->buttonDescriptor);
 		printf("%s", btn_dsc_str);
 		btnlist = btnlist->next;
 		printf("\nnext [%p]\n", btnlist);
@@ -240,10 +240,10 @@ int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype)
 		return -1;
 	}
 
-	(*button)->BtnPin = pin;
-	(*button)->BtnType = btype;
-	(*button)->BtnState = GPIO_HIGH;
-	(*button)->BtnSignal = B_NO_SIGNAL;
+	(*button)->buttonPin = pin;
+	(*button)->buttonType = btype;
+	(*button)->buttonsState = GPIO_HIGH;
+	(*button)->buttonSignal = B_NO_SIGNAL;
 	(*button)->BtnPrsCnt = 0;
 
 	if (InitButtonInput(pin) != 0) {
@@ -286,7 +286,7 @@ int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype)
 		*list = (*list)->next;
 	}
 
-	if (CreateButton(&((*list)->BtnDsc), pin, btype) != 0) {
+	if (CreateButton(&((*list)->buttonDescriptor), pin, btype) != 0) {
 		return -1;
 	}
 
@@ -355,9 +355,9 @@ int DestroyButton(ButtonDescriptor ** button)
 	}
 
 	printf("[%s:%d] GPIO%d unexport;\n"
-		,__FUNCTION__, __LINE__, (*button)->BtnPin);
+		,__FUNCTION__, __LINE__, (*button)->buttonPin);
 
-	if (gpio_unexport((*button)->BtnPin) != 0) {
+	if (GPIO_Unexport((*button)->buttonPin) != 0) {
 		printf("[%s:%d] GPIO unexport failed;\n"
 			,__FUNCTION__, __LINE__);
 	}
@@ -389,7 +389,7 @@ int RemoveButtonFromList(struct ButtonList **list)
 		(*list) = (*list)->next;
 	}
 
-	DestroyButton(&((*list)->BtnDsc));
+	DestroyButton(&((*list)->buttonDescriptor));
 
 	if ((*list) == first) {
 		free(*list);

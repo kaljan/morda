@@ -70,8 +70,8 @@
 #define SSD1311_EX_FSELC		0xDC	// Function Selection C
 #define SSD1311_EX_SET_FADE		0x23	// Set Fade Out and Fade in / out
 
-int ssd1311_init(void);
-int ssd1311_deinit(void);
-int ssd1311_set_string(const char *str, int start);
+int SSD1311_Init(void);
+int SSD1311_Deinit(void);
+int SSD1311_SetString(const char *str, int start);
 
 #endif // SSD1311_H
