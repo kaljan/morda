@@ -365,23 +365,46 @@ int ButtonsInit(Button *button)
 
 	printf("\nbuttonList = %p\n", buttonList);
 
-#if 0
-	if ((ret = pthread_create(&buttonThread, NULL, ButtonThread, NULL)) != 0) {
-		printf("[%s:%d] Creating button thread failed: %s\n"
-			, __func__, __LINE__, strerror(ret));
-		return -1;
-	}
-#endif
+
 	return 0;
 }
 
 int ButtonProcessStart(void)
 {
+	if ((ret = pthread_create(&buttonThread, NULL, ButtonThread, NULL)) != 0) {
+		printf("[%s:%d] Creating button thread failed: %s\n"
+			, __func__, __LINE__, strerror(ret));
+		return -1;
+	}
+
 	return 0;
 }
 
 int ButtonProcessStop(void)
 {
+	return 0;
+}
+
+int DestroyButtonDescriptor(ButtonDescriptor ** button)
+{
+	if (button == 0) {
+		return -1;
+	}
+
+	if (*button == 0) {
+		return 0;
+	}
+
+	//	printf("[%s:%d] Unexport GPIO;\n"
+	//		,__FUNCTION__, __LINE__);
+
+	//	if (gpio_unexport((*list)->BtnDsc->BtnPin) != 0) {
+	//		printf("[%s:%d] GPIO unexport failed;\n"
+	//			,__FUNCTION__, __LINE__);
+	//	}
+
+	free(*button);
+	*button = 0;
 	return 0;
 }
 
@@ -437,8 +460,10 @@ int ButtonListPopBack(struct ButtonList **list)
 	printf("[%s:%d] Destroy button descriptor (%p);\n"
 		,__FUNCTION__, __LINE__, (*list)->BtnDsc);
 
-	free((*list)->BtnDsc);
-	(*list)->BtnDsc = 0;
+//	free((*list)->BtnDsc);
+//	(*list)->BtnDsc = 0;
+
+	DestroyButtonDescriptor(&((*list)->BtnDsc));
 
 	if (prev == first) {
 		// Это единственный элемент в списке. тут мы его и грохнем.
@@ -451,6 +476,13 @@ int ButtonListPopBack(struct ButtonList **list)
 
 	printf("[%s:%d] Destroy item (%p) first element (%p);\n"
 		,__FUNCTION__, __LINE__, prev->next, first);
+
+	printf(
+	"list : %p\n"
+	"first: %p\n"
+	"prevn: %p\n"
+	, *list, first, prev->next
+	);
 
 	*list = first;
 
@@ -483,6 +515,9 @@ int ButtonsDeinit(void)
 			return -1;
 		}
 	}
+
+	printf("\n[%s:%d] FINISHED;\n"
+		,__FUNCTION__, __LINE__, i++, buttonList);
 
 	return 0;
 }
