@@ -64,10 +64,10 @@ int ExitButtonHandler(void *context)
 int main(int argc, char **argv)
 {
 
-	ButtonsInit(btnss);
-	return 0;
+//	ButtonsInit(btnss);
+//	return 0;
 #if 1
-	ButtonsInit(NULL);
+	ButtonsInit(btnss);
 
 	do {
 		if (ButtonProcessStart() != 0) {
