@@ -203,6 +203,11 @@ void *ButtonThread(void *arg)
 
 		buttonDescriptor->buttonSignal = B_NO_SIGNAL;
 
+		if (buttonDescriptor->bCallback != NULL) {
+			(buttonDescriptor->bCallback)(NULL);
+			continue;
+		}
+
 		switch (buttonDescriptor->buttonType) {
 			case BTN_MENU:
 				printf("[%s:%d] Button \"MENU\" pressed (%d);\n"
@@ -238,20 +243,7 @@ void *ButtonThread(void *arg)
 
 // INITIALIZATION ---------------------------------------------------
 
-int InitButtonInput(int pin)
-{
-	if (GPIO_Export(pin) != 0) {
-		return -1;
-	}
-
-	if (GPIO_SetDirection(pin, "in") != 0) {
-		return -1;
-	}
-
-	return 0;
-}
-
-int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype)
+int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype, ButtonCallback callback)
 {
 	printf("[%s:%d] Allocate button descriptor;\n"
 		, __FUNCTION__, __LINE__);
@@ -270,6 +262,7 @@ int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype)
 	(*button)->buttonsState = GPIO_HIGH;
 	(*button)->buttonSignal = B_NO_SIGNAL;
 	(*button)->buttonPressCounter = 0;
+	(*button)->bCallback = callback;
 
 	printf("[%s:%d] Export GPIO;\n"
 		, __FUNCTION__, __LINE__);
@@ -290,16 +283,10 @@ int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype)
 		return -1;
 	}
 
-//	if (InitButtonInput(pin) != 0) {
-//		printf("[%s:%d] Create button failed: GPIO error;\n"
-//			, __FUNCTION__, __LINE__);
-//		return -1;
-//	}
-
 	return 0;
 }
 
-int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype)
+int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype, ButtonCallback callback)
 {
 	struct ButtonList *first = NULL;
 
@@ -343,7 +330,7 @@ int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype)
 
 	printf("[%s:%d] Creating button descriptor;\n"
 		, __FUNCTION__, __LINE__);
-	if (CreateButton(&((*list)->buttonDescriptor), pin, btype) != 0) {
+	if (CreateButton(&((*list)->buttonDescriptor), pin, btype, callback) != 0) {
 		return -1;
 	}
 
@@ -370,13 +357,31 @@ int ButtonProcessStart(void)
 
 int ButtonsInit(Button *button)
 {
+#if 0
 	struct _button_t *btnptr = buttons;
+#endif
 	char str[16];
 
 	buttonList = NULL;
 	buttonDescriptor = NULL;
 	buttonProcessExitFlag = 0;
 
+#if 1
+	while (button->bPin != -1) {
+		getButtonType(str, button->bType);
+		printf("[%s:%d] GPIO%d; Button type: %s;\n"
+			, __FUNCTION__, __LINE__, button->bPin, str);
+
+		if (AddButtonToList(&buttonList, button->bPin,
+				button->bType, button->bCallback) != 0) {
+			printf("[%s:%d] ButtonsInit failed;\n"
+				,__FUNCTION__, __LINE__);
+			return -1;
+		}
+		button++;
+	}
+
+#else
 	while (btnptr->BtnPin != -1) {
 
 		getButtonType(str, btnptr->BtnType);
@@ -393,6 +398,7 @@ int ButtonsInit(Button *button)
 		btnptr++;
 		printf("\n");
 	}
+#endif
 	printButtonList(buttonList);
 
 	return 0;

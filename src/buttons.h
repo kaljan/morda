@@ -17,20 +17,22 @@ typedef enum _ButtonSignalType {
 	B_PRESSED
 } ButtonSignalTpye;
 
+typedef int (*ButtonCallback)(void* context);
+
 typedef struct _ButtonDescriptor {
 	int buttonPin;
 	ButtonType buttonType;
 	GPIO_State buttonsState;
 	ButtonSignalTpye buttonSignal;
 	int buttonPressCounter;
+//	typedef int (*ButtonCallback)(void* context);
+	ButtonCallback bCallback;
 } ButtonDescriptor;
 
 struct ButtonList {
 	ButtonDescriptor *buttonDescriptor;
 	struct ButtonList *next;
 };
-
-typedef int (*ButtonCallback)(void* context);
 
 typedef struct _Button {
 	int bPin;
