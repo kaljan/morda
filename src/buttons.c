@@ -7,127 +7,11 @@
 #include <pthread.h>
 
 
-//#define DBG_HEADER	"\e[1m[\e[0;32m%s\e[0;1m:\e[0;32m%d\e[0;1m]"
-//#define DBG_TERM	"\e[0m\n"
-
-
 struct ButtonList *buttonList;
 ButtonDescriptor *buttonDescriptor;
 pthread_t buttonThread;
-
-struct _button_t {
-	int BtnPin;
-	ButtonType BtnType;
-} buttons[] = {
-	{25, BTN_MENU},
-	{22, BTN_UP},
-	{27, BTN_DOWN},
-	{17, BTN_EXIT},
-	{-1, 0}
-};
-
 int buttonProcessExitFlag;
 
-void getButtonType(char *str, ButtonType btype)
-{
-	switch (btype) {
-	case BTN_MENU:
-		sprintf(str, "BTN_MENU");
-		break;
-
-	case BTN_UP:
-		sprintf(str, "BTN_UP");
-		break;
-
-	case BTN_DOWN:
-		sprintf(str, "BTN_DOWN");
-		break;
-
-	case BTN_EXIT:
-		sprintf(str, "BTN_EXIT");
-		break;
-
-	default:
-		sprintf(str, "UNKNOWN");
-		break;
-	}
-}
-
-void getGPIO_State(char *str, ButtonType btype)
-{
-	switch (btype) {
-	case GPIO_LOW:
-		sprintf(str, "GPIO_LOW");
-		break;
-
-	case GPIO_HIGH:
-		sprintf(str, "GPIO_HIGH");
-		break;
-
-	default:
-		sprintf(str, "UNKNOWN");
-		break;
-	}
-}
-
-void geButtonSignalTpye(char *str, ButtonType btype)
-{
-	switch (btype) {
-	case B_NO_SIGNAL:
-		sprintf(str, "B_NO_SIGNAL");
-		break;
-
-	case B_PRESSED:
-		sprintf(str, "B_PRESSED");
-		break;
-
-	default:
-		sprintf(str, "UNKNOWN");
-		break;
-	}
-}
-
-void ButtonDescriptorToStr(char *str, ButtonDescriptor *button)
-{
-	char btn_type_str[16];
-	char btn_state_str[16];
-	char btn_signal_str[16];
-
-	getButtonType(btn_type_str, button->buttonType);
-	getGPIO_State(btn_state_str, button->buttonsState);
-	geButtonSignalTpye(btn_signal_str, button->buttonSignal);
-
-	sprintf(str,
-	"    Pin   : %d\n"
-	"    Type  : %s\n"
-	"    State : %s\n"
-	"    Signal: %s\n"
-	"    Count : %d\n"
-	, button->buttonPin
-	, btn_type_str
-	, btn_state_str
-	, btn_signal_str
-	, button->buttonPressCounter
-	);
-
-}
-
-void printButtonList(struct ButtonList *btnlist)
-{
-	char btn_dsc_str[256];
-
-	printf("\nbuttonList [%p]\n", btnlist);
-
-	while (btnlist) {
-		printf("  ButtonDescriptor [%p]\n", btnlist->buttonDescriptor);
-		ButtonDescriptorToStr(btn_dsc_str, btnlist->buttonDescriptor);
-		printf("%s", btn_dsc_str);
-		btnlist = btnlist->next;
-		printf("\nnext [%p]\n", btnlist);
-	}
-}
-
-// HANDLER ----------------------------------------------------------
 
 int ButtonHandler(ButtonDescriptor *button)
 {
@@ -186,6 +70,7 @@ void *ButtonThread(void *arg)
 			buttonProcessExitFlag = 0;
 			break;
 		}
+
 		if (buttonDescriptor == NULL) {
 			buttonDescriptor = getButtonDescriptor(buttonList);
 			continue;
@@ -204,64 +89,25 @@ void *ButtonThread(void *arg)
 		buttonDescriptor->buttonSignal = B_NO_SIGNAL;
 
 		if (buttonDescriptor->bCallback != NULL) {
-			printf("[%s:%d] Calling calback;\n"
-				,__FUNCTION__, __LINE__);
-
 			(buttonDescriptor->bCallback)(arg);
 			buttonDescriptor = NULL;
-			continue;
-		} else {
-
 		}
 
-		switch (buttonDescriptor->buttonType) {
-			case BTN_MENU:
-				printf("[%s:%d] Button \"MENU\" pressed (%d);\n"
-					,__FUNCTION__, __LINE__, buttonDescriptor->buttonPressCounter);
-				break;
+		// TODO: Добавить обработку отсутствия колбэка
 
-			case BTN_UP:
-				printf("[%s:%d] Button \"UP\" pressed (%d);\n"
-					,__FUNCTION__, __LINE__, buttonDescriptor->buttonPressCounter);
-				break;
-
-			case BTN_DOWN:
-				printf("[%s:%d] Button \"DOWN\" pressed (%d);\n"
-					,__FUNCTION__, __LINE__, buttonDescriptor->buttonPressCounter);
-
-				break;
-
-			case BTN_EXIT:
-				printf("[%s:%d] Button \"EXIT\" pressed (%d);\n"
-					,__FUNCTION__, __LINE__, buttonDescriptor->buttonPressCounter);
-				break;
-
-			default:
-				printf("[%s:%d] Button \"UNKNOWN\" pressed (%d);\n"
-					,__FUNCTION__, __LINE__, buttonDescriptor->buttonPressCounter);
-				break;
-		}
-		buttonDescriptor->buttonPressCounter++;
 		buttonDescriptor = NULL;
 	}
 	return arg;
 }
 
-// INITIALIZATION ---------------------------------------------------
 
 int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype, ButtonCallback callback)
 {
-	printf("[%s:%d] Allocate button descriptor;\n"
-		, __FUNCTION__, __LINE__);
-
 	if ((*button = malloc(sizeof(ButtonDescriptor))) == NULL) {
 		printf("[%s:%d] Create button failed: Memory allocate error;\n"
 			, __FUNCTION__, __LINE__);
 		return -1;
 	}
-
-	printf("[%s:%d] Initialize descriptor parameters;\n"
-		, __FUNCTION__, __LINE__);
 
 	(*button)->buttonPin = pin;
 	(*button)->buttonType = btype;
@@ -270,17 +116,11 @@ int CreateButton(ButtonDescriptor **button, int pin, ButtonType btype, ButtonCal
 	(*button)->buttonPressCounter = 0;
 	(*button)->bCallback = callback;
 
-	printf("[%s:%d] Export GPIO;\n"
-		, __FUNCTION__, __LINE__);
-
 	if (GPIO_Export(pin) != 0) {
 		printf("[%s:%d] Create button failed: GPIO error;\n"
 			, __FUNCTION__, __LINE__);
 		return -1;
 	}
-
-	printf("[%s:%d] Set GPIO Direction;\n"
-		, __FUNCTION__, __LINE__);
 
 	if (GPIO_SetDirection(pin, "in") != 0) {
 		printf("[%s:%d] Create button failed: GPIO error;\n"
@@ -304,27 +144,16 @@ int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype, ButtonC
 
 	if (*list == 0) { // Список не создан
 		// Создаём список
-		printf("[%s:%d] Creating list;\n"
-			, __FUNCTION__, __LINE__);
-
 		if ((*list = malloc(sizeof(struct ButtonList))) == NULL) {
 			printf("[%s:%d] Create button list failed: Memory allocate error;\n"
 				,__FUNCTION__, __LINE__);
 			return -1;
 		}
 	} else {
-		printf("[%s:%d] Add item to list;\n"
-			, __FUNCTION__, __LINE__);
-
 		first = *list;
 		while ((*list)->next) {
-			printf("[%s:%d] Go to last element;\n"
-				, __FUNCTION__, __LINE__);
 			*list = (*list)->next;
 		}
-
-		printf("[%s:%d] Allocate new element;\n"
-			, __FUNCTION__, __LINE__);
 
 		if (((*list)->next = malloc(sizeof(struct ButtonList))) == NULL) {
 			printf("[%s:%d] Create button list failed: Memory allocate error;\n"
@@ -334,8 +163,6 @@ int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype, ButtonC
 		*list = (*list)->next;
 	}
 
-	printf("[%s:%d] Creating button descriptor;\n"
-		, __FUNCTION__, __LINE__);
 	if (CreateButton(&((*list)->buttonDescriptor), pin, btype, callback) != 0) {
 		return -1;
 	}
@@ -350,8 +177,6 @@ int AddButtonToList(struct ButtonList **list, int pin, ButtonType btype, ButtonC
 int ButtonProcessStart(void)
 {
 	int ret;
-	printf("[%s:%d] Starting button thread;\n"
-		, __FUNCTION__, __LINE__);
 	if ((ret = pthread_create(&buttonThread, NULL, ButtonThread, NULL)) != 0) {
 		printf("[%s:%d] Creating button thread failed: %s\n"
 			, __func__, __LINE__, strerror(ret));
@@ -363,21 +188,11 @@ int ButtonProcessStart(void)
 
 int ButtonsInit(Button *button)
 {
-#if 0
-	struct _button_t *btnptr = buttons;
-#endif
-	char str[16];
-
 	buttonList = NULL;
 	buttonDescriptor = NULL;
 	buttonProcessExitFlag = 0;
 
-#if 1
 	while (button->bPin != -1) {
-		getButtonType(str, button->bType);
-		printf("[%s:%d] GPIO%d; Button type: %s;\n"
-			, __FUNCTION__, __LINE__, button->bPin, str);
-
 		if (AddButtonToList(&buttonList, button->bPin,
 				button->bType, button->bCallback) != 0) {
 			printf("[%s:%d] ButtonsInit failed;\n"
@@ -388,37 +203,13 @@ int ButtonsInit(Button *button)
 		printf("\n");
 	}
 
-#else
-	while (btnptr->BtnPin != -1) {
-
-		getButtonType(str, btnptr->BtnType);
-
-		printf("[%s:%d] Add button %s to list;\n"
-			, __FUNCTION__, __LINE__, str);
-
-		if (AddButtonToList(&buttonList, btnptr->BtnPin,
-				btnptr->BtnType) != 0) {
-			printf("[%s:%d] ButtonsInit failed;\n"
-				,__FUNCTION__, __LINE__);
-			return -1;
-		}
-		btnptr++;
-		printf("\n");
-	}
-#endif
-	printButtonList(buttonList);
-
 	return 0;
 }
 
 int ButtonProcessStop(void)
 {
-	printf("[%s:%d] Stopping button thread;\n"
-		, __FUNCTION__, __LINE__);
 	buttonProcessExitFlag = 1;
 	while (buttonProcessExitFlag == 1);
-	printf("[%s:%d] Button thread stopped;\n"
-		, __FUNCTION__, __LINE__);
 	return 0;
 }
 
@@ -436,16 +227,10 @@ int DestroyButton(ButtonDescriptor ** button)
 		return 0;
 	}
 
-	printf("[%s:%d] GPIO%d unexport;\n"
-		,__FUNCTION__, __LINE__, (*button)->buttonPin);
-
 	if (GPIO_Unexport((*button)->buttonPin) != 0) {
 		printf("[%s:%d] GPIO unexport failed;\n"
 			,__FUNCTION__, __LINE__);
 	}
-
-	printf("[%s:%d] Free ButtonDescriptor;\n"
-		,__FUNCTION__, __LINE__);
 
 	free(*button);
 	*button = 0;
@@ -467,33 +252,20 @@ int RemoveButtonFromList(struct ButtonList **list)
 	first = *list;
 	prev = first;
 
-	printf("[%s:%d] Remove item from list;\n"
-		,__FUNCTION__, __LINE__);
-
 	while ((*list)->next) {
-		printf("[%s:%d] Go to last element;\n"
-			,__FUNCTION__, __LINE__);
 		prev = (*list);
 		(*list) = (*list)->next;
 	}
 
-	printf("[%s:%d] Destroy element;\n"
-		,__FUNCTION__, __LINE__);
-
 	DestroyButton(&((*list)->buttonDescriptor));
 
 	if ((*list) == first) {
-		printf("[%s:%d] Destroy list;\n"
-			,__FUNCTION__, __LINE__);
 		free(*list);
 		*list = 0;
 		return 0;
 	}
 
 	*list = first;
-
-	printf("[%s:%d] Destroy element;\n"
-		,__FUNCTION__, __LINE__);
 
 	free(prev->next);
 	prev->next = NULL;
@@ -503,11 +275,7 @@ int RemoveButtonFromList(struct ButtonList **list)
 
 int ButtonsDeinit(void)
 {
-	int i = 0;
-
 	while (buttonList) {
-		printf("[%s:%d] Remove item %d;\n"
-			,__FUNCTION__, __LINE__, i++);
 		if (RemoveButtonFromList(&buttonList) != 0) {
 			printf("[%s:%d] Pop failed;\n"
 				,__FUNCTION__, __LINE__);

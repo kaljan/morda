@@ -13,7 +13,6 @@ SOURCES += \
     src/ssd1311/ssd1311.c \
     src/periph/gpio.c \
     src/periph/i2c.c \
-    src/btn.c \
     src/buttons.c
 
 HEADERS += \

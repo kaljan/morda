@@ -7,11 +7,11 @@ int end_app;
 
 extern int animation(void);
 
-
 int MenuButtonHandler(void *context);
 int UpButtonHandler(void *context);
 int DownButtonHandler(void *context);
 int ExitButtonHandler(void *context);
+
 
 static void catch_signal(int sig)
 {
@@ -61,11 +61,39 @@ int ExitButtonHandler(void *context)
 	return 0;
 }
 
+
+/*
+TODO: Добавить ошибки и их обработчики.
+TODO: Добавить в дисплей функцию standby
+Ошибки:
+NULL pointer
+Bad file
+.....
+Другие ошибки
+
+Процесс инициализации
+1. Сначала инициализируем дисплей. если его инициализация сломалась
+   то дальше работку проги продолжать безсмысленно.
+2. Инициализируем кнопки. таже херня.
+3. ну а дальше подумаем.
+
+TODO: создать структуру меню
+
+будет зацикленный двухсвязный список список.
+в которому будут:
+MenuDescriptor
+prev
+next
+
+в описании менюхи будут
+id
+name
+callback
+
+*/
 int main(int argc, char **argv)
 {
 
-//	ButtonsInit(btnss);
-//	return 0;
 #if 1
 	ButtonsInit(btnss);
 

@@ -15,7 +15,6 @@ OBJECTS = \
 	ssd1311.o \
 	buttons.o \
 	si.o \
-	btn.o \
 	scr.o \
 	main.o
 
@@ -39,9 +38,6 @@ buttons.o : src/buttons.c src/buttons.h
 
 si.o : src/si.c src/si.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/si.c
-
-btn.o : src/btn.c src/periph/periph.h
-	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/btn.c
 
 scr.o : src/scr.c src/ssd1311/ssd1311.h src/si.h
 	$(CC) $(CFLAGS) $(INCLUDEPATH) -c src/scr.c
