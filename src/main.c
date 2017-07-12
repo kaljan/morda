@@ -20,8 +20,17 @@ int main(int argc, char **argv)
 #if 1
 	ButtonsInit(NULL);
 
-	printf("Press any key to continue...\n");
-	getchar();
+	do {
+		if (ButtonProcessStart() != 0) {
+			break;
+		}
+
+		printf("Press any key to continue...\n");
+		getchar();
+
+		ButtonProcessStop();
+
+	} while (0);
 
 	ButtonsDeinit();
 #else

@@ -497,6 +497,7 @@ int ButtonsDeinit(void)
 				,__FUNCTION__, __LINE__);
 			return -1;
 		}
+		printf("\n");
 	}
 
 	return 0;
