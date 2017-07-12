@@ -204,8 +204,14 @@ void *ButtonThread(void *arg)
 		buttonDescriptor->buttonSignal = B_NO_SIGNAL;
 
 		if (buttonDescriptor->bCallback != NULL) {
-			(buttonDescriptor->bCallback)(NULL);
+			printf("[%s:%d] Calling calback;\n"
+				,__FUNCTION__, __LINE__);
+
+			(buttonDescriptor->bCallback)(arg);
+			buttonDescriptor = NULL;
 			continue;
+		} else {
+
 		}
 
 		switch (buttonDescriptor->buttonType) {
@@ -379,6 +385,7 @@ int ButtonsInit(Button *button)
 			return -1;
 		}
 		button++;
+		printf("\n");
 	}
 
 #else
