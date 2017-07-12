@@ -181,6 +181,11 @@ ButtonDescriptor *getButtonDescriptor(struct ButtonList *list)
 void *ButtonThread(void *arg)
 {
 	while (1) {
+		if (buttonProcessExitFlag != 0) {
+			buttonDescriptor = NULL;
+			buttonProcessExitFlag = 0;
+			break;
+		}
 		if (buttonDescriptor == NULL) {
 			buttonDescriptor = getButtonDescriptor(buttonList);
 			continue;
@@ -195,6 +200,8 @@ void *ButtonThread(void *arg)
 		if (buttonDescriptor->buttonSignal == B_NO_SIGNAL) {
 			continue;
 		}
+
+		buttonDescriptor->buttonSignal = B_NO_SIGNAL;
 
 		switch (buttonDescriptor->buttonType) {
 			case BTN_MENU:
@@ -225,10 +232,6 @@ void *ButtonThread(void *arg)
 		}
 		buttonDescriptor->buttonPressCounter++;
 		buttonDescriptor = NULL;
-		if (buttonProcessExitFlag != 0) {
-			buttonProcessExitFlag = 0;
-			break;
-		}
 	}
 	return arg;
 }
