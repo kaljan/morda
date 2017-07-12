@@ -22,7 +22,7 @@ typedef struct _ButtonDescriptor {
 	ButtonType buttonType;
 	GPIO_State buttonsState;
 	ButtonSignalTpye buttonSignal;
-	int BtnPrsCnt;
+	int buttonPressCounter;
 } ButtonDescriptor;
 
 struct ButtonList {

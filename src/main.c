@@ -19,6 +19,10 @@ int main(int argc, char **argv)
 {
 #if 1
 	ButtonsInit(NULL);
+
+	printf("Press any key to continue...\n");
+	getchar();
+
 	ButtonsDeinit();
 #else
 
